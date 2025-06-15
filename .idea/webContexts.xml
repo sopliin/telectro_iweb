@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebContextManager">
+    <option name="state">
+      <map>
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/Coordinador/dashboard.jsp" value="file://$PROJECT_DIR$/src/main/webapp/Coordinador" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/Coordinador/subirExcelRespuestas.jsp" value="file://$PROJECT_DIR$/src/main/webapp/Coordinador" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/admin/dashboard.jsp" value="file://$PROJECT_DIR$/src/main/webapp/admin" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/admin/formularioNuevo.jsp" value="file://$PROJECT_DIR$/src/main/webapp/admin" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/admin/lista.jsp" value="file://$PROJECT_DIR$/src/main/webapp/admin" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/admin/ver_detalles_coord.jsp" value="file://$PROJECT_DIR$/src/main/webapp/admin" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/index.jsp" value="file://$PROJECT_DIR$/src/main/webapp" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/onu_mujeres/static/cambiar_contrasena.jsp" value="file://$PROJECT_DIR$/src/main/webapp/onu_mujeres/static" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/onu_mujeres/static/encuestador_encuestadas.jsp" value="file://$PROJECT_DIR$/src/main/webapp/onu_mujeres/static" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/onu_mujeres/static/encuestador_encuestas_progreso.jsp" value="file://$PROJECT_DIR$/src/main/webapp/onu_mujeres/static" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/onu_mujeres/static/encuestador_encuestas_sin_completar.jsp" value="file://$PROJECT_DIR$/src/main/webapp/onu_mujeres/static" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/onu_mujeres/static/encuestador_ver_tu_perfil.jsp" value="file://$PROJECT_DIR$/src/main/webapp/onu_mujeres/static" />
+      </map>
+    </option>
+  </component>
+</project>
