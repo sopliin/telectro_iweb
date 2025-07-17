@@ -64,8 +64,8 @@ public class UsuarioAdminDao extends BaseDAO{
 
     //Registrar usuario para admin (crear coordinadores mediante el ingreso de nombre, apellido, DNI, Correo y zona)
     public void registrarCoordinador(Usuario usuario) {
-        String sql = "INSERT INTO onu_mujeres.usuarios (rol_id, nombre, apellido_paterno, apellido_materno, dni, correo, zona_id, distrito_id, correo_verificado)\n"
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)";
+        String sql = "INSERT INTO onu_mujeres.usuarios (rol_id, nombre, apellido_paterno, apellido_materno, dni, correo, zona_id, distrito_id, correo_verificado, profile_photo_url)\n"
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -198,18 +198,21 @@ public class UsuarioAdminDao extends BaseDAO{
 
         //Ya que admin crea cordi, su correo ya esta verificado
         pstmt.setInt(9,1);
+
+        //foto de Perfil por defecto
+        pstmt.setString(10, "perfil.png");
     }
 
     public DashboardDTO obtenerEstadisticasDashboard(){
         DashboardDTO dashboardDTO = new DashboardDTO();
         String sql = "SELECT\n" +
-                "          (SELECT COUNT(*) FROM usuarios) AS totalUsuarios,\n" +
-                "          (SELECT COUNT(*) FROM usuarios WHERE estado = 'activo') AS totalActivos,\n" +
-                "          (SELECT COUNT(*) FROM usuarios WHERE estado = 'baneado') AS totalInactivos,\n" +
-                "          (SELECT COUNT(*) FROM usuarios WHERE rol_id = 2) AS totalCoordinadores,\n" +
-                "          (SELECT COUNT(*) FROM usuarios WHERE rol_id = 1) AS totalEncuestadores,\n" +
-                "          (SELECT COUNT(*) FROM usuarios WHERE fecha_registro >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH) AND rol_id IN (1, 2)) AS nuevosUltimoMes,\n" +
-                "          (SELECT z.nombre FROM zonas z JOIN usuarios u ON z.zona_id = u.zona_id GROUP BY z.zona_id ORDER BY COUNT(*) DESC LIMIT 1) AS zonaMasActiva";
+                "          (SELECT COUNT(*) FROM usuarios where correo_verificado=1 ) AS totalUsuarios,\n" +
+                "          (SELECT COUNT(*) FROM usuarios WHERE estado = 'activo' and correo_verificado=1) AS totalActivos,\n" +
+                "          (SELECT COUNT(*) FROM usuarios WHERE estado = 'baneado' and correo_verificado=1) AS totalInactivos,\n" +
+                "          (SELECT COUNT(*) FROM usuarios WHERE rol_id = 2 and correo_verificado=1) AS totalCoordinadores,\n" +
+                "          (SELECT COUNT(*) FROM usuarios WHERE rol_id = 1 and correo_verificado=1) AS totalEncuestadores,\n" +
+                "          (SELECT COUNT(*) FROM usuarios WHERE fecha_registro >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH) AND rol_id IN (1, 2) and correo_verificado=1) AS nuevosUltimoMes,\n" +
+                "          (SELECT z.nombre FROM zonas z JOIN usuarios u ON z.zona_id = u.zona_id  where u.rol_id<3 and u.correo_verificado=1 GROUP BY z.zona_id ORDER BY COUNT(*) DESC LIMIT 1) AS zonaMasActiva";
 
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
@@ -232,9 +235,9 @@ public class UsuarioAdminDao extends BaseDAO{
 
     public Map<String, Integer> obtenerUsuariosPorMes() {
         Map<String, Integer> usuariosPorMes = new LinkedHashMap<>();
-        String sql = "SELECT DATE_FORMAT(fecha_registro, '%Y-%m') AS mes, COUNT(*) AS total " +
+        String sql = "SELECT DATE_FORMAT(fecha_registro, '%m/%Y') AS mes, COUNT(*) AS total " +
                 "FROM usuarios " +
-                "WHERE fecha_registro >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH) " +
+                "WHERE fecha_registro >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH) and correo_verificado=1 " +
                 "GROUP BY mes " +
                 "ORDER BY mes";
 
@@ -256,7 +259,7 @@ public class UsuarioAdminDao extends BaseDAO{
         String sql = "SELECT r.nombre, COUNT(*) AS total " +
                 "FROM usuarios u " +
                 "JOIN roles r ON u.rol_id = r.rol_id " +
-                "WHERE u.rol_id IN (1, 2) " +
+                "WHERE u.rol_id IN (1, 2) AND u.correo_verificado=1 " +
                 "GROUP BY r.nombre";
 
         try (Connection conn = getConnection();

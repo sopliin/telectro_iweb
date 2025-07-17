@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="org.example.onu_mujeres_crud.daos.UsuarioDAO" %>
 <%@ page import="org.example.onu_mujeres_crud.beans.Usuario" %>
+<%@ page import="java.net.URLEncoder" %>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -32,29 +33,57 @@
     <div class="error-icon">
       <i class="fas fa-exclamation-circle"></i>
     </div>
-    <h2 class="mb-3">Token Inválido o Expirado</h2>
 
-    <!-- Mensaje condicional -->
+    <%
+      String reason = request.getParameter("reason");
+      String emailParam = request.getParameter("email");
+      boolean tieneRegistroNoVerificado = false;
+
+      if (emailParam != null && !emailParam.isEmpty()) {
+        UsuarioDAO userDao = new UsuarioDAO();
+        Usuario user = userDao.usuarioByEmailNoVer(emailParam);
+        tieneRegistroNoVerificado = (user != null && !user.isCorreoVerificado());
+      }
+    %>
+
+    <h2 class="mb-3">
+      <%= "expired".equals(reason) ? "¡Token Expirado!" : "Token Inválido" %>
+    </h2>
+
     <p class="lead mb-4">
-      ${tieneRegistroNoVerificado ?
-              'Ya existe un registro no verificado con este correo.' :
-              'El token de validación no es válido o ha expirado.'}
+      <%
+        if ("expired".equals(reason)) {%>
+
+      El enlace de validación ha expirado. Por favor solicite uno nuevo.
+      <%
+        } else if (tieneRegistroNoVerificado) {
+          %>
+      Ya existe un registro no verificado con este correo.
+      <%} else {%>
+      El token de validación no es válido o ha expirado.
+      <%
+        }
+      %>
     </p>
 
     <div class="d-flex justify-content-center gap-3">
       <%
-        Boolean tieneRegistro = (Boolean) request.getAttribute("tieneRegistroNoVerificado");
-        String email = (String) request.getAttribute("emailParam");
-
-        if(tieneRegistro != null && tieneRegistro) {
+        if (tieneRegistroNoVerificado) {
       %>
       <form action="<%=request.getContextPath()%>/login" method="post">
         <input type="hidden" name="action" value="resend_validation">
-        <input type="hidden" name="email" value="<%=email%>">
+        <input type="hidden" name="email" value="<%=emailParam%>">
         <button type="submit" class="btn btn-primary">
           <i class="fas fa-paper-plane me-2"></i>Reenviar correo de validación
         </button>
       </form>
+      <%
+      } else if ("expired".equals(reason)) {
+      %>
+      <a href="<%=request.getContextPath()%>/login?action=register&email=<%=URLEncoder.encode(emailParam, "UTF-8")%>"
+         class="btn btn-outline-primary">
+        <i class="fas fa-user-plus me-2"></i>Registrarse Nuevamente
+      </a>
       <%
       } else {
       %>
@@ -64,6 +93,7 @@
       <%
         }
       %>
+
       <a href="<%=request.getContextPath()%>/login" class="btn btn-primary">
         <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
       </a>

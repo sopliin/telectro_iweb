@@ -307,7 +307,9 @@ public class SystemServlet extends HttpServlet {
         if (tokenDao.findToken(validationToken)) {
             response.sendRedirect(request.getContextPath() + "/login?action=create_password&token=" + validationToken);
         } else {
-            response.sendRedirect(request.getContextPath() + "/login?action=invalid_token");
+            String email = tokenDao.getEmailByToken(validationToken);
+
+            response.sendRedirect(request.getContextPath() + "/login?action=invalid_token&reason=expired&email=" + URLEncoder.encode(email, "UTF-8"));
         }
     }
 
@@ -334,7 +336,7 @@ public class SystemServlet extends HttpServlet {
             System.out.println("no entra primero");
             HttpSession httpSession = request.getSession();
             httpSession.setAttribute("msgErrorLogin", "Usuario o contraseña incorrecto");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
 
@@ -379,40 +381,47 @@ public class SystemServlet extends HttpServlet {
                 }
             } else {
                 // Usuario sin rol asignado
-                response.sendRedirect("login");
+                response.sendRedirect(request.getContextPath() +"/login");
             }
         } else {
             System.out.println("Usuario no encontrado2");
             HttpSession httpSession = request.getSession();
             httpSession.setAttribute("msgErrorLogin", "Usuario o contraseña incorrecto");
-            request.getRequestDispatcher("/login.jsp").forward(request, response);
+            response.sendRedirect(request.getContextPath() +"/login");
         }
     }
 
     //registro de encuestador
     private void handleRegistration(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String email = request.getParameter("email");
+        System.out.println("pasa el correo");
+        if (!email.matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$|^[a-zA-Z0-9._%+-]+@pucp\\.edu\\.pe$")) {
+            System.out.println("correo no valido");
+            response.sendRedirect(request.getContextPath() + "/login?action=register&error=invalid_email");
+            return;
+        }
         String names = request.getParameter("names");
         String lastnames1 = request.getParameter("lastnames1");
         String lastnames2 = request.getParameter("lastnames2");
         String dniStr = request.getParameter("code");
-        String email = request.getParameter("email");
+
         String direccion = request.getParameter("direccion");
         String distritoIdParam = request.getParameter("distrito");
 
         try {
-            int dni = Integer.parseInt(dniStr);
+            //int dni = Integer.parseInt(dniStr);
             String correoDB = userDao.verificarCorreo(email);
-            String codigoDB = userDao.verificarDni(String.valueOf(dni));
+            String codigoDB = userDao.verificarDni(dniStr);
 
             if (correoDB != null || codigoDB != null) {
                 response.sendRedirect(request.getContextPath() +"/login?action=register&error=no_valid");
                 return;
             }
 
-            Usuario user = createUserObject(names, lastnames1, lastnames2, dni, email, direccion, distritoIdParam);
+            Usuario user = createUserObject(names, lastnames1, lastnames2, dniStr, email, direccion, distritoIdParam);
             if (encDao.crearUsuario1(user)) {
                 String token = tokenDao.generateToken(email);
-                String validationLink = request.getRequestURL().toString().replace(request.getServletPath(), "") + "/login?action=validate_email&token=" + token;
+                String validationLink = "http://localhost:8080" + "/login?action=validate_email&token=" + token;
                 String emailBody = "Por favor valide su correo haciendo clic en el siguiente enlace:\n" + validationLink;
                 System.out.println(request.getRequestURL().toString().replace(request.getServletPath(), ""));
                 System.out.println(request.getContextPath());
@@ -431,12 +440,12 @@ public class SystemServlet extends HttpServlet {
     }
 
     private Usuario createUserObject(String names, String lastnames1, String lastnames2,
-                                     int dni, String email, String direccion, String distritoIdParam) {
+                                     String dni, String email, String direccion, String distritoIdParam) {
         Usuario user = new Usuario();
         user.setNombre(names);
         user.setApellidoPaterno(lastnames1);
         user.setApellidoMaterno(lastnames2);
-        user.setDni(String.valueOf(dni));
+        user.setDni(dni);
         user.setCorreo(email);
         user.setDireccion(direccion);
 

@@ -136,24 +136,17 @@ public class ContenidoEncuestaServlet extends HttpServlet {
         String dniEncuestado = request.getParameter("dniEncuestado");
         String fechaInicio = request.getParameter("fechaInicio");
 
-        if (dniEncuestado == null || dniEncuestado.trim().isEmpty()) {
-            request.setAttribute("error", "El DNI del encuestado es obligatorio.");
-            // Recargar preguntas y opciones para volver al formulario con el error
-            try {
-                ArrayList<BancoPreguntas> preguntas = contenidoEncuestaDAO.obtenerPreguntasDeEncuestaAsignada(asignacionId);
-                request.setAttribute("preguntasEncuesta", preguntas);
-                request.setAttribute("asignacionId", asignacionId);
-                for (BancoPreguntas pregunta : preguntas) {
-                    if (pregunta.getTipo().equals("opcion_unica") || pregunta.getTipo().equals("opcion_multiple")) {
-                        ArrayList<PreguntaOpcion> opciones = contenidoEncuestaDAO.obtenerOpcionesDePregunta(pregunta.getPreguntaId());
-                        request.setAttribute("opciones_" + pregunta.getPreguntaId(), opciones);
-                    }
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
+        // Validación STRICTA solo para "guardarCompleta"
+        if ("guardarCompleta".equals(action)) {
+            if (dniEncuestado == null || dniEncuestado.trim().isEmpty() || !dniEncuestado.matches("\\d{8}")) {
+                request.setAttribute("error", "Para enviar la encuesta completa, el DNI debe tener 8 dígitos.");
+                recargarFormulario(request, response, asignacionId); // Método auxiliar para recargar datos
+                return;
             }
-            request.getRequestDispatcher("/encuestador/mostrarEncuesta.jsp").forward(request, response);
-            return;
+        }
+// Para "guardarBorrador", aceptar DNI vacío o incompleto (pero no nulo)
+        else if (dniEncuestado == null) {
+            dniEncuestado = ""; // Asignar cadena vacía si es null
         }
 
 
@@ -312,4 +305,24 @@ public class ContenidoEncuestaServlet extends HttpServlet {
             request.getRequestDispatcher("/encuestador/mostrarEncuesta.jsp").forward(request, response);
         }
     }
+    private void recargarFormulario(HttpServletRequest request, HttpServletResponse response, int asignacionId)
+            throws ServletException, IOException {
+        ContenidoEncuestaDAO contenidoEncuestaDAO = new ContenidoEncuestaDAO();
+        try {
+            ArrayList<BancoPreguntas> preguntas = contenidoEncuestaDAO.obtenerPreguntasDeEncuestaAsignada(asignacionId);
+            request.setAttribute("preguntasEncuesta", preguntas);
+            request.setAttribute("asignacionId", asignacionId);
+
+            for (BancoPreguntas pregunta : preguntas) {
+                if (pregunta.getTipo().equals("opcion_unica") || pregunta.getTipo().equals("opcion_multiple")) {
+                    ArrayList<PreguntaOpcion> opciones = contenidoEncuestaDAO.obtenerOpcionesDePregunta(pregunta.getPreguntaId());
+                    request.setAttribute("opciones_" + pregunta.getPreguntaId(), opciones);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        request.getRequestDispatcher("/encuestador/mostrarEncuesta.jsp").forward(request, response);
+    }
+
 }

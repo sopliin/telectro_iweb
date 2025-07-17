@@ -3,7 +3,9 @@
 <%@ page import="org.example.onu_mujeres_crud.beans.Usuario" %>
 <%@ page import="org.example.onu_mujeres_crud.dtos.DashboardDTO" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="com.google.gson.internal.bind.util.ISO8601Utils" %>
 <%
+    boolean sidebarAbierto = request.getAttribute("sidebarAbierto") != null ? (Boolean) request.getAttribute("sidebarAbierto") : true;
     DashboardDTO estadisticas = (DashboardDTO) request.getAttribute("estadisticas");
     Map<String, Integer> usuariosPorMes = (Map<String, Integer>) request.getAttribute("usuariosPorMes");
     Map<String, Integer> distribucionRoles = (Map<String, Integer>) request.getAttribute("distribucionRoles");
@@ -13,13 +15,109 @@
 <html>
 <head>
     <title>Dashboard Coordinador - Encuestas Completadas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="http://localhost:8080/onu_mujeres_crud_war_exploded/onu_mujeres/static/css/app.css">
+
+    <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/onu_mujeres/static/css/app.css">
+    <%System.out.println("aqui para ver el request");%>
+        <%=request.getContextPath()%>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+
     <style>
+
+        /* Sidebar mejorado */
+        .sidebar {
+            background: linear-gradient(195deg, #42424a, #191919) !important; /* Fondo oscuro elegante */
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        .sidebar .sidebar-brand {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .sidebar-link {
+            color: rgba(255, 255, 255, 0.7) !important;
+            transition: all 0.2s ease-in-out;
+        }
+        /* Estilo para el elemento activo de la sidebar - como en la imagen 'Encuestadores de zona' */
+        .sidebar-item.active > .sidebar-link {
+            color: #ffffff !important;
+            background-color: transparent !important; /* Fondo transparente */
+            border-left: 5px solid #007bff; /* Borde izquierdo azul fuerte */
+            padding-left: calc(1.5rem - 5px); /* Ajustar padding para compensar el borde */
+            border-radius: 0; /* Sin bordes redondeados en este lado */
+            box-shadow: none; /* Eliminar sombra para este estilo */
+        }
+        .sidebar-item.active > .sidebar-link:hover {
+            background-color: rgba(255, 255, 255, 0.05) !important; /* Un ligero hover */
+        }
+        .sidebar-link:hover { /* Estilo de hover general */
+            color: #ffffff !important;
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            border-radius: 0.5rem;
+        }
+
+        .sidebar-header {
+            color: rgba(255, 255, 255, 0.5) !important;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .navbar {
+            min-height: 56px;
+            background-color: #ffffff !important; /* Navbar blanca */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .navbar-nav .nav-item {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+        .navbar-align .nav-item .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            padding-top: 0;
+            padding-bottom: 0;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        /* Estilo para la imagen de perfil del usuario */
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 0.5rem;
+            flex-shrink: 0;
+            border: 2px solid #e9ecef; /* Pequeño borde para la foto de perfil */
+        }
+        /* Contenedor del nombre y rol */
+        .navbar-align .nav-item .dropdown-toggle .user-info-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+        .navbar-align .nav-item .dropdown-toggle .user-info-container .text-dark {
+            line-height: 1.2;
+            font-weight: 600; /* Negrita para el nombre */
+            color: #344767 !important;
+        }
+        .navbar-align .nav-item .dropdown-toggle .user-info-container .text-muted {
+            font-size: 0.75em;
+            line-height: 1.2;
+            text-transform: uppercase; /* Rol en mayúsculas */
+            color: #6c757d !important;
+        }
+        /* Espaciado del botón desplegable (flecha) a la derecha del nombre/rol */
+        .navbar-align .nav-item .dropdown-toggle::after {
+            margin-left: 0.5rem;
+        }
+
         .chart-container {
             background-color: white;
             border-radius: 10px;
@@ -41,30 +139,115 @@
         .card-body {
             color: white !important;
         }
-        /* Estilos adicionales para el menú activo */
-        .sidebar-item.active .sidebar-link {
-            background-color: #3b7ddd; /* Color azul */
-            color: white !important;
-            border-radius: 4px;
+
+
+        .nombre {
+            font-weight: bold;
         }
 
-        .sidebar-item.active .sidebar-link i {
-            color: white !important;
+        .rol {
+            font-size: 0.9em;
+            color: #888;
         }
 
-        .sidebar-item.active .sidebar-link:hover {
-            background-color: #3068be; /* Color azul más oscuro al pasar el mouse */
+        .col-md-2-4 {
+            flex: 0 0 20%;
+            max-width: 20%;
+        }
+
+
+    </style>
+    <style>
+        /* Pantallas medianas/grandes (md+) - 5 tarjetas por fila */
+        @media (min-width: 768px) {
+            .col-md-2-4 {
+                flex: 0 0 20%;
+                max-width: 20%;
+            }
+        }
+
+        /* Pantallas pequeñas (sm) - 2 tarjetas por fila */
+        @media (max-width: 767.98px) {
+            .col-md-2-4 {
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+        }
+
+        /* Móviles (xs) - 1 tarjeta por fila */
+        @media (max-width: 575.98px) {
+            .col-md-2-4 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
+        .chart-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 400px; /* Añade esta línea */
+        }
+        .bg-custom-indigo {
+            background-color: #6610f2 !important;  /* Color morado/indigo intenso */
         }
     </style>
 
+    <style>
+        .wrapper {
+            display: flex;
+            min-height: 100vh; /* Ocupa al menos el 100% del viewport */
+            overflow-x: hidden;
+        }
+        .sidebar {
+            height: 100vh; /* Altura completa del viewport */
+
+            left: 0;
+            top: 0;
+            z-index: 1000; /* Asegura que esté por encima del contenido */
+            overflow-y: auto; /* Permite scroll si el contenido es muy largo */
+        }
+
+
+    </style>
+    <style>
+
+
+        .footer .row {
+            flex-wrap: wrap; /* Permite que los elementos se ajusten en móviles */
+        }
+
+        .footer .col-6 {
+            width: 100% !important; /* Ocupa todo el ancho en móviles */
+            text-align: center !important; /* Centra el texto */
+            margin-bottom: 0.5rem; /* Espacio entre elementos */
+        }
+
+        .footer .list-inline {
+
+            flex-wrap: wrap; /* Permite que los ítems se ajusten */
+        }
+
+        .footer .list-inline-item {
+            margin: 0 0.5rem; /* Espacio entre ítems */
+        }
+
+
+
+
+
+
+    </style>
 
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 </head>
 <body>
 <div class="wrapper">
-    <nav id="sidebar" class="sidebar js-sidebar">
+    <nav id="sidebar" class="sidebar js-sidebar <%= sidebarAbierto ? "" : "collapsed" %>">
         <div class="sidebar-content js-simplebar">
             <a class="sidebar-brand" href="AdminServlet?action=menu">
                 <span class="align-middle">ONU Mujeres</span>
@@ -89,17 +272,23 @@
             </ul>
         </div>
     </nav>
-    <div class="main">
+    <div class="main ">
         <nav class="navbar navbar-expand navbar-light navbar-bg">
-            <a class="sidebar-toggle js-sidebar-toggle">
-                <i class="hamburger align-self-center"></i>
-            </a>
+            <a class="sidebar-toggle js-sidebar-toggle"><i class="hamburger align-self-center"></i></a>
             <div class="navbar-collapse collapse">
                 <ul class="navbar-nav navbar-align">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#" data-bs-toggle="dropdown">
-                            <img src="<%=request.getContextPath()%>/fotos/<%=user.getProfilePhotoUrl()%>" class="avatar img-fluid rounded me-1" alt="Foto" />
-                            <span class="text-dark"><%=user.getNombre()%> <%=user.getApellidoPaterno()%></span>
+                        <a class="nav-link dropdown-toggle    " href="#" data-bs-toggle="dropdown">
+                            <%-- Aquí se reemplaza el icono Feather por la imagen de perfil --%>
+                            <img src="<%=request.getContextPath()%>/fotos/<%=user.getProfilePhotoUrl()%>" class="avatar img-fluid rounded me-2" alt="Foto"/>
+                            <div class="d-inline-block">
+                                <div class="nombre">
+                                    <span class="text-dark d-block"><%=user.getNombre()%> <%=user.getApellidoPaterno()%></span>
+                                </div>
+                                <div class="rol">
+                                    <small class="text-muted d-block text-uppercase"><%= user.getRol() != null ? user.getRol().getNombre() : "ROL DESCONOCIDO" %></small>
+                                </div>
+                            </div>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end">
                             <a class="dropdown-item" href="AdminServlet?action=verPerfil"><i class="align-middle me-1" data-feather="user"></i> Ver Perfil</a>
@@ -110,6 +299,7 @@
                 </ul>
             </div>
         </nav>
+
         <main class="content">
             <h2 class="mb-4">Panel de Administración</h2>
 
@@ -130,7 +320,7 @@
 
             <!-- Estadísticas rápidas -->
             <div class="row mb-4">
-                <div class="col-md-3">
+                <div class="col-6 col-md-2-4">
                     <div class="card card-counter bg-primary text-white mb-3">
                         <div class="card-body" >
                             <div class="d-flex justify-content-between align-items-center">
@@ -144,7 +334,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2-4">
                     <div class="card card-counter bg-success text-white mb-3">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
@@ -158,7 +348,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2-4">
                     <div class="card card-counter bg-warning text-white mb-3">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
@@ -172,7 +362,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2-4">
                     <div class="card card-counter bg-secondary text-white mb-3">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
@@ -186,20 +376,38 @@
                     </div>
                 </div>
 
+                <div class="col-md-2-4">
+                    <div class="card card-counter bg-custom-indigo text-white mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title text-white">Zona con más usuarios</h6>
+                                    <h2 class="mb-0 text-white"><%= estadisticas.getZonaMasActiva() != null ? estadisticas.getZonaMasActiva() : "N/A" %></h2>
+                                </div>
+                                <i class="bi bi-geo-alt"></i>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <!-- Gráficos y reportes -->
             <div class="row">
                 <div class="col-md-6">
-                    <div class="chart-container" style="position: relative; height: 300px; width: 100%">
-                        <h5>Distribución de Usuarios por Rol</h5>
+                    <div class="chart-container" style="position: relative; min-height: 400px; width: 100%">
+                        <h4>Distribución de Usuarios por Rol</h4>
+                        <div style="overflow-x: auto; max-width: 100%;">
                         <canvas id="rolesChart" height="300"></canvas>
+                        </div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
                     <div class="chart-container" style="position: relative; height: 300px; width: 100%">
-                        <h5>Registros Mensuales (Últimos 6 meses)</h5>
+                        <h4>Registros Mensuales (Últimos 6 meses)</h4>
+
                         <canvas id="registrosChart" height="300"></canvas>
                     </div>
                 </div>
@@ -236,44 +444,15 @@
                 </div>
             </div>
 
-            <!-- Zona más activa -->
-            <div class="row mt-4">
-                <div class="col-md-12">
-                    <div class="chart-container">
-                        <h5>Zona con Mayor Actividad</h5>
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle me-2"></i>
-                            La zona con más usuarios registrados es:
-                            <strong><%= estadisticas.getZonaMasActiva() != null ? estadisticas.getZonaMasActiva() : "No disponible" %></strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
         </main>
-        <footer class="footer">
-            <div class="container-fluid">
-                <div class="row text-muted">
-                    <div class="col-6 text-start">
-                        <p class="mb-0">
-                            <a class="text-muted" href="https://adminkit.io/" target="_blank"><strong>AdminKit</strong></a> &copy;
-                        </p>
-                    </div>
-                    <div class="col-6 text-end">
-                        <ul class="list-inline">
-                            <li class="list-inline-item"><a class="text-muted" href="#">Soporte</a></li>
-                            <li class="list-inline-item"><a class="text-muted" href="#">Centro de Ayuda</a></li>
-                            <li class="list-inline-item"><a class="text-muted" href="#">Privacidad</a></li>
-                            <li class="list-inline-item"><a class="text-muted" href="#">Términos</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </footer>
+        <jsp:include page="../includes/footer.jsp"/>
     </div>
 </div>
-<script type="text/javascript" src="http://localhost:8080/onu_mujeres_crud_war_exploded/onu_mujeres/static/js/app.js"></script>
+
 
 <script>
+
     // Gráfico de distribución de roles
     const rolesCtx = document.getElementById('rolesChart');
     const rolesChart = new Chart(rolesCtx, {
@@ -300,24 +479,53 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
+                datalabels: {
+                    color: function(context) {
+                        // Color dinámico para mejor contraste
+                        return context.dataset.backgroundColor[context.dataIndex] === '#f6c23e'
+                            ? '#000' : '#fff';
+                    },
+                    formatter: (value, context) => {
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        if (total === 0) return '0%';
+                        const percentage = Math.round((value / total) * 100);
+                        return percentage + '%';
+                    },
+                    font: { weight: 'bold', size: 14 },
+                    anchor: 'center',
+                    align: 'center'
+                },
                 legend: {
-                    position: 'right',
+                    position: window.innerWidth < 768 ? 'bottom' : 'right',
                     labels: {
                         boxWidth: 15,
-                        padding: 15
+                        padding: 15,
+                        font: {
+                            size: window.innerWidth < 900 ? 15 : 17 // Tamaño más pequeño en móviles
+                        }
                     }
                 }
             },
             layout: {
                 padding: {
                     left: 10,
-                    right: 10,
+                    right: 30,
                     top: 10,
-                    bottom: 10
+                    bottom: window.innerWidth < 900 ? 50 : 10 // Más espacio abajo en móviles
                 }
-            }
-        }
+            },
+            cutout: window.innerWidth < 900 ? '50%' : '40%' // Hueco más grande en móviles
+        },
+        plugins: [ChartDataLabels]
     });
+    window.addEventListener('resize', function() {
+        rolesChart.options.plugins.legend.position = window.innerWidth < 900 ? 'bottom' : 'right';
+        rolesChart.options.plugins.legend.labels.font.size = window.innerWidth < 900 ? 16.5 : 17;
+        rolesChart.options.layout.padding.bottom = window.innerWidth < 900 ? 50 : 10;
+        rolesChart.options.cutout = window.innerWidth < 900 ? '50%' : '40%';
+        rolesChart.update();
+    });
+
 
     // Gráfico de registros mensuales
     const registrosCtx = document.getElementById('registrosChart');
@@ -376,6 +584,30 @@
 
     // Cerrar alertas automáticamente después de 5 segundos
 
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // Toggle sidebar
+    document.querySelector('.js-sidebar-toggle').addEventListener('click', function() {
+        document.querySelector('.js-sidebar').classList.toggle('collapsed');
+        document.querySelector('.main').classList.toggle('sidebar-collapsed');
+    });
+
+    // Inicializar feather icons
+    document.addEventListener('DOMContentLoaded', function() {
+        feather.replace();
+
+        // Cerrar alertas automáticamente después de 5 segundos
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    });
 </script>
 </body>
 </html>

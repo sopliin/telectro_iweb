@@ -15,10 +15,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @WebServlet(name = "EncuestadorServlet", value = "/EncuestadorServlet")
@@ -28,6 +25,7 @@ import java.util.List;
         maxRequestSize = 1024 * 1024 * 10 // 10MB
 )
 public class EncuestadorServlet extends HttpServlet {
+    private static final int DEFAULT_PAGE_SIZE = 10;
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action") == null ? "total" : request.getParameter("action");
@@ -35,54 +33,87 @@ public class EncuestadorServlet extends HttpServlet {
         Usuario user = (Usuario) session.getAttribute("usuario");
         int encuestadorId = user.getUsuarioId();
         //
-
-        EncuestaDAO encuestaDAO = new EncuestaDAO();
-        //ContenidoEncuestaDAO contenidoEncuestaDAO = new ContenidoEncuestaDAO();
-        RequestDispatcher view;
-
-        //TODO: Obtener el id del encuestador de la sesión (Mover esto dentro de cada case donde se use)
-        //int encuestadorId = 27;
         if (encuestadorId == 0) {
             response.sendRedirect("login.jsp?error=notLoggedIn");
             return;
         }
 
+
+        //TODO: Obtener el id del encuestador de la sesión (Mover esto dentro de cada case donde se use)
+        //int encuestadorId = 27;
+
+        // Parámetros de paginación
+        int page = 1;
+        int pageSize = DEFAULT_PAGE_SIZE;
+
+        try {
+            page = Integer.parseInt(request.getParameter("page"));
+        } catch (NumberFormatException e) {
+            page = 1;
+        }
+
+        try {
+            pageSize = Integer.parseInt(request.getParameter("pageSize"));
+        } catch (NumberFormatException e) {
+            pageSize = DEFAULT_PAGE_SIZE;
+        }
+
+        EncuestaDAO encuestaDAO = new EncuestaDAO();
+        //ContenidoEncuestaDAO contenidoEncuestaDAO = new ContenidoEncuestaDAO();
+        RequestDispatcher view;
+
         switch (action) {
             case "total":
-                System.out.println("encuestadorId");
-                List<EncuestaAsignada> todasLasEncuestas = encuestaDAO.obtenerFormulariosCompletados2(encuestadorId);
+                int totalCount = encuestaDAO.contarEncuestasAsignadas(encuestadorId, null);
+                List<EncuestaAsignada> todasLasEncuestas = encuestaDAO.obtenerFormulariosCompletados2(
+                        encuestadorId, (page - 1) * pageSize, pageSize);
+
                 request.setAttribute("listaEncuestas", todasLasEncuestas);
-                view = request.getRequestDispatcher("/onu_mujeres/static/encuestador_encuestadas.jsp");
+                request.setAttribute("totalCount", totalCount);
+                request.setAttribute("page", page);
+                request.setAttribute("pageSize", pageSize);
+                view = request.getRequestDispatcher("/encuestador/encuestador_encuestadas.jsp");
                 view.forward(request, response);
                 break;
             case "terminados":
-                //List<Encuesta> encuestasTerminadas = encuestaDAO.obtenerFormulariosCompletados(encuestadorId);
-                //request.setAttribute("listaEncuestas", encuestasTerminadas);
-                List<EncuestaAsignada> encuestasTerminadas =encuestaDAO.obtenerFormulariosCompletados1(encuestadorId,"completada");
+                int terminadosCount = encuestaDAO.contarEncuestasAsignadas(encuestadorId, "completada");
+                List<EncuestaAsignada> encuestasTerminadas = encuestaDAO.obtenerFormulariosCompletados1(
+                        encuestadorId, "completada", (page - 1) * pageSize, pageSize);
+
                 request.setAttribute("listaEncuestas", encuestasTerminadas);
-                view = request.getRequestDispatcher("/onu_mujeres/static/encuestador_encuestas_completadas.jsp");
+                request.setAttribute("totalCount", terminadosCount);
+                request.setAttribute("page", page);
+                request.setAttribute("pageSize", pageSize);
+                view = request.getRequestDispatcher("/encuestador/encuestador_encuestas_completadas.jsp");
                 view.forward(request, response);
                 break;
             case "pendientes":
-                //List<Encuesta> encuestasPendientes = encuestaDAO.obtenerFormulariosSinLlenar(encuestadorId);
-                //request.setAttribute("listaEncuestas", encuestasPendientes);
-                List<EncuestaAsignada> encuestasPendientes =encuestaDAO.obtenerFormulariosCompletados1(encuestadorId,"asignada");
+                int pendientesCount = encuestaDAO.contarEncuestasAsignadas(encuestadorId, "asignada");
+                List<EncuestaAsignada> encuestasPendientes = encuestaDAO.obtenerFormulariosCompletados1(
+                        encuestadorId, "asignada", (page - 1) * pageSize, pageSize);
 
                 request.setAttribute("listaEncuestas", encuestasPendientes);
-                view = request.getRequestDispatcher("/onu_mujeres/static/encuestador_encuestas_sin_completar.jsp");
+                request.setAttribute("totalCount", pendientesCount);
+                request.setAttribute("page", page);
+                request.setAttribute("pageSize", pageSize);
+                view = request.getRequestDispatcher("/encuestador/encuestador_encuestas_sin_completar.jsp");
                 view.forward(request, response);
                 break;
             case "borradores":
-                //List<Encuesta> encuestasBorradores = encuestaDAO.obtenerFormulariosConBorradores(encuestadorId);
-                //request.setAttribute("listaEncuestas", encuestasBorradores);
-                List<EncuestaAsignada> encuestasBorradores =encuestaDAO.obtenerFormulariosCompletados1(encuestadorId,"en_progreso");
+                int borradoresCount = encuestaDAO.contarEncuestasAsignadas(encuestadorId, "en_progreso");
+                List<EncuestaAsignada> encuestasBorradores = encuestaDAO.obtenerFormulariosCompletados1(
+                        encuestadorId, "en_progreso", (page - 1) * pageSize, pageSize);
+
                 request.setAttribute("listaEncuestas", encuestasBorradores);
-                view = request.getRequestDispatcher("/onu_mujeres/static/encuestador_encuestas_progreso.jsp");
+                request.setAttribute("totalCount", borradoresCount);
+                request.setAttribute("page", page);
+                request.setAttribute("pageSize", pageSize);
+                view = request.getRequestDispatcher("/encuestador/encuestador_encuestas_progreso.jsp");
                 view.forward(request, response);
                 break;
             //ever
             case "ver":
-                view = request.getRequestDispatcher("/onu_mujeres/static/encuestador_ver_tu_perfil.jsp");
+                view = request.getRequestDispatcher("/encuestador/encuestador_ver_tu_perfil.jsp");
                 view.forward(request, response);
                 break;
             case "editarPerfil":
@@ -92,7 +123,7 @@ public class EncuestadorServlet extends HttpServlet {
                 handleChangePasswordGet(request, response);
                 break;
             case "crearFormulario":
-                view = request.getRequestDispatcher("/onu_mujeres/static/encuestador_formulario.jsp");
+                view = request.getRequestDispatcher("/encuestador/encuestador_formulario.jsp");
                 view.forward(request, response);
                     break;
             case "descripcion":
@@ -217,7 +248,7 @@ public class EncuestadorServlet extends HttpServlet {
             return;
         }
 
-        RequestDispatcher view = request.getRequestDispatcher("/onu_mujeres/static/cambiar_contrasena.jsp");
+        RequestDispatcher view = request.getRequestDispatcher("/encuestador/cambiar_contrasena.jsp");
         view.forward(request, response);
     }
 
@@ -280,7 +311,7 @@ public class EncuestadorServlet extends HttpServlet {
         if (filePart == null || filePart.getSize() == 0) {
             System.out.println("no seleccioo una foto");
             request.setAttribute("error", "No se seleccionó una foto.");
-            request.getRequestDispatcher("/onu_mujeres/static/encuestador_ver_tu_perfil.jsp").forward(request, response);
+            request.getRequestDispatcher("/encuestador/encuestador_ver_tu_perfil.jsp").forward(request, response);
             return;
         }
 
@@ -290,7 +321,7 @@ public class EncuestadorServlet extends HttpServlet {
         if (extension == null) {
             System.out.println("no seleccioo no peritido");
             request.setAttribute("error", "Tipo de archivo no permitido.");
-            request.getRequestDispatcher("/onu_mujeres/static/encuestador_ver_tu_perfil.jsp").forward(request, response);
+            request.getRequestDispatcher("/encuestador/encuestador_ver_tu_perfil.jsp").forward(request, response);
             return;
         }
 
@@ -365,7 +396,7 @@ public class EncuestadorServlet extends HttpServlet {
         ArrayList<Distrito> distritos = distritoDAO.obtenerListaDistritosxZona(zonaid);
 
         request.setAttribute("distritos", distritos);
-        RequestDispatcher view = request.getRequestDispatcher("/onu_mujeres/static/editar_perfil.jsp");
+        RequestDispatcher view = request.getRequestDispatcher("/encuestador/editar_perfil.jsp");
         view.forward(request, response);
     }
 
@@ -435,359 +466,3 @@ public class EncuestadorServlet extends HttpServlet {
         return 0; // Placeholder
     }
 }
-//package org.example.onu_mujeres_crud.servlet;
-//
-//import jakarta.servlet.*;
-//import jakarta.servlet.http.*;
-//import jakarta.servlet.annotation.*;
-//import org.example.onu_mujeres_crud.beans.Encuesta;
-//import org.example.onu_mujeres_crud.beans.PreguntaEncuesta;
-//import org.example.onu_mujeres_crud.beans.RespuestaDetalle;
-//import org.example.onu_mujeres_crud.daos.EncuestaDAO;
-//import org.example.onu_mujeres_crud.daos.ContenidoEncuestaDAO;
-//
-//import java.io.IOException;
-//import java.time.LocalDateTime;
-//import java.time.format.DateTimeFormatter;
-//import java.util.List;
-//
-//@WebServlet(name = "EncuestadorServlet", value = "/EncuestadorServlet")
-//public class EncuestadorServlet extends HttpServlet {
-//    @Override
-//    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-//        String action = request.getParameter("action") == null ? "total" : request.getParameter("action");
-//
-//
-//        EncuestaDAO encuestaDAO = new EncuestaDAO();
-//        //ContenidoEncuestaDAO contenidoEncuestaDAO = new ContenidoEncuestaDAO();
-//        RequestDispatcher view;
-//
-//        //TODO: Obtener el id del encuestador de la sesión (Mover esto dentro de cada case donde se use)
-//        int encuestadorId = 27;
-//        if (encuestadorId == 0) {
-//            response.sendRedirect("login.jsp?error=notLoggedIn");
-//            return;
-//        }
-//
-//        switch (action) {
-//            case "total":
-//                List<Encuesta> todasLasEncuestas = encuestaDAO.obtenerTodasLasEncuestas(encuestadorId);
-//                request.setAttribute("listaEncuestas", todasLasEncuestas);
-//                view = request.getRequestDispatcher("onu_mujeres/static/encuestador_encuestadas.jsp");
-//                view.forward(request, response);
-//                break;
-//            case "terminadas":
-//                List<Encuesta> encuestasTerminadas = encuestaDAO.obtenerFormulariosCompletados(encuestadorId);
-//                request.setAttribute("listaEncuestas", encuestasTerminadas);
-//                view = request.getRequestDispatcher("onu_mujeres/static/encuestador_encuestas_completadas.jsp");
-//                view.forward(request, response);
-//                break;
-//            case "pendientes":
-//                List<Encuesta> encuestasPendientes = encuestaDAO.obtenerFormulariosSinLlenar(encuestadorId);
-//                request.setAttribute("listaEncuestas", encuestasPendientes);
-//                view = request.getRequestDispatcher("onu_mujeres/static/encuestador_encuestas_sin_completar.jsp");
-//                view.forward(request, response);
-//                break;
-//            case "borradores":
-//                List<Encuesta> encuestasBorradores = encuestaDAO.obtenerFormulariosConBorradores(encuestadorId);
-//                request.setAttribute("listaEncuestas", encuestasBorradores);
-//                view = request.getRequestDispatcher("onu_mujeres/static/encuestador_encuestas_progreso.jsp");
-//                view.forward(request, response);
-//                break;
-////            case "obtenerBorrador":
-////                if (request.getParameter("encuestaId") != null) {
-////                    int encuestaId = Integer.parseInt(request.getParameter("encuestaId"));
-////
-////                    //TODO: Obtener el respuestaId del borrador para la encuesta y el encuestador
-////                    int respuestaId = obtenerRespuestaIdDeBorrador(encuestadorId, encuestaId); // Replace with actual logi
-////                    if (respuestaId == 0) {
-////
-////                        response.sendRedirect("EncuestadorServlet?action=pendientes");
-////                        return;
-////                    }
-////
-////                    List<RespuestaDetalle> respuestasGuardadas = contenidoEncuestaDAO.obtenerRespuestasAnteriores(respuestaId);
-////                    request.setAttribute("respuestasGuardadas", respuestasGuardadas);
-////                    request.setAttribute("encuestaId", encuestaId);
-////                    List<PreguntaEncuesta> preguntas = contenidoEncuestaDAO.obtenerPreguntasDeEncuesta(encuestadorId, encuestaId);
-////                    request.setAttribute("preguntas", preguntas);
-////                    view = request.getRequestDispatcher("encuestador/encuestador_formulario.jsp");
-////                    view.forward(request, response);
-////                } else {
-////                    response.sendRedirect("EncuestadorServlet?action=borradores");
-////                }
-////                break;
-//            default:
-//                response.sendRedirect("EncuestadorServlet?action=total");
-//                break;
-//        }
-//    }
-//
-//    @Override
-//    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-//        String action = request.getParameter("action");
-//        //TODO: Obtener el id del encuestador de la sesión
-//        int encuestadorId = obtenerEncuestadorIdDeSesion(request);
-//        if (encuestadorId == 0) {
-//            response.sendRedirect("login.jsp?error=notLoggedIn");
-//            return;
-//        }
-//
-//        ContenidoEncuestaDAO contenidoEncuestaDAO = new ContenidoEncuestaDAO();
-//
-////        switch (action) {
-////            case "guardarRespuestas":
-////                int encuestaId = Integer.parseInt(request.getParameter("encuestaId"));
-////
-////                //TODO: Obtener o crear el respuestaId (if it's a new or existing response)
-////                int respuestaId = obtenerOCrearRespuestaId(encuestadorId, encuestaId);
-////                if (respuestaId == 0) {
-////                    response.sendRedirect("EncuestadorServlet?error=dbError");
-////                    return;
-////                }
-////
-////                java.util.Enumeration<String> paramNames = request.getParameterNames();
-////                while (paramNames.hasMoreElements()) {
-////                    String paramName = paramNames.nextElement();
-////                    if (paramName.startsWith("pregunta_")) {
-////                        int preguntaId = Integer.parseInt(paramName.substring(9));
-////                        String respuesta = request.getParameter(paramName);
-////                        int opcionId = 0;
-////
-////                        if (paramName.contains("opcion")) {
-////                            opcionId = Integer.parseInt(respuesta);
-////                            respuesta = null;
-////                        }
-////
-////                        LocalDateTime now = LocalDateTime.now();
-////                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-////                        String fechaContestacion = now.format(formatter);
-////
-////                        RespuestaDetalle detalle = new RespuestaDetalle();
-////                        detalle.setRespuestaId(respuestaId);
-////                        detalle.setPreguntaId(preguntaId);
-////                        detalle.setOpcionId(opcionId);
-////                        detalle.setRespuestaTexto(respuesta);
-////                        detalle.setFechaContestacion(fechaContestacion);
-////
-////                        contenidoEncuestaDAO.guardarRespuesta(detalle);
-////                    }
-////                }
-////                response.sendRedirect("EncuestadorServlet?action=total");
-////                break;
-////
-////            case "guardar":
-////                response.sendRedirect("login.jsp");
-////                break;
-////        }
-//    }
-//
-//    //Metodos que me sugirio Gemini, lo dejo porsiacaso
-//
-//    private int obtenerEncuestadorIdDeSesion(HttpServletRequest request) {
-//        HttpSession session = request.getSession();
-//        Integer encuestadorId = (Integer) session.getAttribute("encuestadorId"); // Assuming you store it as "encuestadorId"
-//        if (encuestadorId == null) {
-//            return 0; // Or throw an exception, or handle as appropriate for your app
-//        }
-//        return encuestadorId;
-//    }
-//
-//    private int obtenerRespuestaIdDeBorrador(int encuestadorId, int encuestaId) {
-//        // TODO: Implement this method to query the database and get the respuesta_id
-//        //       for the given encuestadorId and encuestaId where the response is a draft.
-//        //       You'll likely need a RespuestaDAO for this.
-//        //       Return 0 if no draft exists.
-//        // For now, return a placeholder:
-//        return 0;  // Placeholder
-//    }
-//
-//    private int obtenerOCrearRespuestaId(int encuestadorId, int encuestaId) {
-//        // TODO: Implement this method.
-//        //       It should check if a respuesta_id exists for the encuestadorId and encuestaId.
-//        //       If it exists (a draft), return the existing ID.
-//        //       If it doesn't exist (new response), create a new Respuesta record in the database
-//        //       and return the generated respuesta_id.  Again, use a RespuestaDAO.
-//        //       Return 0 if there's an error.
-//        // For now, return a placeholder:
-//        return 0; // Placeholder
-//    }
-//}
-////package org.example.onu_mujeres_crud.servlet;
-////
-////import jakarta.servlet.*;
-////import jakarta.servlet.http.*;
-////import jakarta.servlet.annotation.*;
-////import org.example.onu_mujeres_crud.beans.Encuesta;
-////import org.example.onu_mujeres_crud.beans.PreguntaEncuesta;
-////import org.example.onu_mujeres_crud.beans.RespuestaDetalle;
-////import org.example.onu_mujeres_crud.daos.EncuestaDAO;
-////import org.example.onu_mujeres_crud.daos.ContenidoEncuestaDAO;
-////
-////import java.io.IOException;
-////import java.time.LocalDateTime;
-////import java.time.format.DateTimeFormatter;
-////import java.util.List;
-////
-////@WebServlet(name = "EncuestadorServlet", value = "/EncuestadorServlet")
-////public class EncuestadorServlet extends HttpServlet {
-////    @Override
-////    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-////        String action = request.getParameter("action") == null ? "total" : request.getParameter("action");
-////
-////
-////        EncuestaDAO encuestaDAO = new EncuestaDAO();
-////        ContenidoEncuestaDAO contenidoEncuestaDAO = new ContenidoEncuestaDAO();
-////        RequestDispatcher view;
-////
-////        //TODO: Obtener el id del encuestador de la sesión (Mover esto dentro de cada case donde se use)
-////        int encuestadorId = 100;
-////        if (encuestadorId == 0) {
-////            response.sendRedirect("login.jsp?error=notLoggedIn");
-////            return;
-////        }
-////
-////        switch (action) {
-////            case "total":
-////                List<Encuesta> todasLasEncuestas = encuestaDAO.obtenerTodasLasEncuestas(encuestadorId);
-////                request.setAttribute("listaEncuestas", todasLasEncuestas);
-////                view = request.getRequestDispatcher("onu_mujeres/static/encuestador_encuestadas.jsp");
-////                view.forward(request, response);
-////                break;
-////            case "terminadas":
-////                List<Encuesta> encuestasTerminadas = encuestaDAO.obtenerFormulariosCompletados(encuestadorId);
-////                request.setAttribute("listaEncuestas", encuestasTerminadas);
-////                view = request.getRequestDispatcher("onu_mujeres/static/encuestador_encuestas_completadas.jsp");
-////                view.forward(request, response);
-////                break;
-////            case "pendientes":
-////                List<Encuesta> encuestasPendientes = encuestaDAO.obtenerFormulariosSinLlenar(encuestadorId);
-////                request.setAttribute("listaEncuestas", encuestasPendientes);
-////                view = request.getRequestDispatcher("onu_mujeres/static/encuestador_encuestas_sin_completar.jsp");
-////                view.forward(request, response);
-////                break;
-////            case "borradores":
-////                List<Encuesta> encuestasBorradores = encuestaDAO.obtenerFormulariosConBorradores(encuestadorId);
-////                request.setAttribute("listaEncuestas", encuestasBorradores);
-////                view = request.getRequestDispatcher("onu_mujeres/static/encuestador_encuestas_progreso.jsp");
-////                view.forward(request, response);
-////                break;
-////            case "obtenerBorrador":
-////                if (request.getParameter("encuestaId") != null) {
-////                    int encuestaId = Integer.parseInt(request.getParameter("encuestaId"));
-////
-////                    //TODO: Obtener el respuestaId del borrador para la encuesta y el encuestador
-////                    int respuestaId = obtenerRespuestaIdDeBorrador(encuestadorId, encuestaId); // Replace with actual logi
-////                    if (respuestaId == 0) {
-////
-////                        response.sendRedirect("EncuestadorServlet?action=pendientes");
-////                        return;
-////                    }
-////
-////                    List<RespuestaDetalle> respuestasGuardadas = contenidoEncuestaDAO.obtenerRespuestasAnteriores(respuestaId);
-////                    request.setAttribute("respuestasGuardadas", respuestasGuardadas);
-////                    request.setAttribute("encuestaId", encuestaId);
-////                    List<PreguntaEncuesta> preguntas = contenidoEncuestaDAO.obtenerPreguntasDeEncuesta(encuestadorId, encuestaId);
-////                    request.setAttribute("preguntas", preguntas);
-////                    view = request.getRequestDispatcher("encuestador/encuestador_formulario.jsp");
-////                    view.forward(request, response);
-////                } else {
-////                    response.sendRedirect("EncuestadorServlet?action=borradores");
-////                }
-////                break;
-////            default:
-////                response.sendRedirect("EncuestadorServlet?action=total");
-////                break;
-////        }
-////    }
-////
-////    @Override
-////    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-////        String action = request.getParameter("action");
-////        //TODO: Obtener el id del encuestador de la sesión
-////        int encuestadorId = obtenerEncuestadorIdDeSesion(request);
-////        if (encuestadorId == 0) {
-////            response.sendRedirect("login.jsp?error=notLoggedIn");
-////            return;
-////        }
-////
-////        ContenidoEncuestaDAO contenidoEncuestaDAO = new ContenidoEncuestaDAO();
-////
-////        switch (action) {
-////            case "guardarRespuestas":
-////                int encuestaId = Integer.parseInt(request.getParameter("encuestaId"));
-////
-////                //TODO: Obtener o crear el respuestaId (if it's a new or existing response)
-////                int respuestaId = obtenerOCrearRespuestaId(encuestadorId, encuestaId);
-////                if (respuestaId == 0) {
-////                    response.sendRedirect("EncuestadorServlet?error=dbError");
-////                    return;
-////                }
-////
-////                java.util.Enumeration<String> paramNames = request.getParameterNames();
-////                while (paramNames.hasMoreElements()) {
-////                    String paramName = paramNames.nextElement();
-////                    if (paramName.startsWith("pregunta_")) {
-////                        int preguntaId = Integer.parseInt(paramName.substring(9));
-////                        String respuesta = request.getParameter(paramName);
-////                        int opcionId = 0;
-////
-////                        if (paramName.contains("opcion")) {
-////                            opcionId = Integer.parseInt(respuesta);
-////                            respuesta = null;
-////                        }
-////
-////                        LocalDateTime now = LocalDateTime.now();
-////                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-////                        String fechaContestacion = now.format(formatter);
-////
-////                        RespuestaDetalle detalle = new RespuestaDetalle();
-////                        detalle.setRespuestaId(respuestaId);
-////                        detalle.setPreguntaId(preguntaId);
-////                        detalle.setOpcionId(opcionId);
-////                        detalle.setRespuestaTexto(respuesta);
-////                        detalle.setFechaContestacion(fechaContestacion);
-////
-////                        contenidoEncuestaDAO.guardarRespuesta(detalle);
-////                    }
-////                }
-////                response.sendRedirect("EncuestadorServlet?action=total");
-////                break;
-////
-////            case "guardar":
-////                response.sendRedirect("login.jsp");
-////                break;
-////        }
-////    }
-////
-////    //Metodos que me sugirio Gemini, lo dejo porsiacaso
-////
-////    private int obtenerEncuestadorIdDeSesion(HttpServletRequest request) {
-////        HttpSession session = request.getSession();
-////        Integer encuestadorId = (Integer) session.getAttribute("encuestadorId"); // Assuming you store it as "encuestadorId"
-////        if (encuestadorId == null) {
-////            return 0; // Or throw an exception, or handle as appropriate for your app
-////        }
-////        return encuestadorId;
-////    }
-////
-////    private int obtenerRespuestaIdDeBorrador(int encuestadorId, int encuestaId) {
-////        // TODO: Implement this method to query the database and get the respuesta_id
-////        //       for the given encuestadorId and encuestaId where the response is a draft.
-////        //       You'll likely need a RespuestaDAO for this.
-////        //       Return 0 if no draft exists.
-////        // For now, return a placeholder:
-////        return 0;  // Placeholder
-////    }
-////
-////    private int obtenerOCrearRespuestaId(int encuestadorId, int encuestaId) {
-////        // TODO: Implement this method.
-////        //       It should check if a respuesta_id exists for the encuestadorId and encuestaId.
-////        //       If it exists (a draft), return the existing ID.
-////        //       If it doesn't exist (new response), create a new Respuesta record in the database
-////        //       and return the generated respuesta_id.  Again, use a RespuestaDAO.
-////        //       Return 0 if there's an error.
-////        // For now, return a placeholder:
-////        return 0; // Placeholder
-////    }
-////}

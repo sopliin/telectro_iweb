@@ -116,7 +116,7 @@ public class EncuestaDAO extends BaseDAO {
         }
         return encuestasCompletadas;
     }
-    public List<EncuestaAsignada> obtenerFormulariosCompletados1(int encuestadorId,String estado) {
+    public List<EncuestaAsignada> obtenerFormulariosCompletados1(int encuestadorId,String estado, int offset, int limit) {
         List<EncuestaAsignada> encuestasCompletadas = new ArrayList<>();
         String sql = "SELECT ea.asignacion_id, e.encuesta_id, e.nombre AS nombre_encuesta, " +
                 "e.descripcion, ea.fecha_asignacion, ea.fecha_completado, " +
@@ -127,19 +127,21 @@ public class EncuestaDAO extends BaseDAO {
                 "JOIN usuarios u_coord ON ea.coordinador_id = u_coord.usuario_id " +
                 "JOIN usuarios u_encuest ON ea.encuestador_id = u_encuest.usuario_id " +
                 "WHERE ea.encuestador_id = ? AND ea.estado = ? " +
-                "ORDER BY ea.fecha_completado DESC";
+                "ORDER BY ea.fecha_completado DESC LIMIT ? OFFSET ?;";
 
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, encuestadorId);
             pstmt.setString(2, estado);
+            pstmt.setInt(3, limit);
+            pstmt.setInt(4, offset);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     EncuestaAsignada encuestaAsignada = new EncuestaAsignada();
                     encuestaAsignada.setAsignacionId(rs.getInt("asignacion_id"));
                     encuestaAsignada.setFechaCompletado(rs.getString("fecha_completado"));
                     encuestaAsignada.setFechaAsignacion(rs.getString("fecha_asignacion"));
-
+                    encuestaAsignada.setEstado(estado);
                     Usuario coordinador = new Usuario();
                     coordinador.setNombre(rs.getString("coordinador_asignador"));
                     coordinador.setApellidoPaterno(rs.getString("coordinador_apellido"));
@@ -159,7 +161,7 @@ public class EncuestaDAO extends BaseDAO {
         }
         return encuestasCompletadas;
     }
-    public List<EncuestaAsignada> obtenerFormulariosCompletados2(int encuestadorId) {
+    public List<EncuestaAsignada> obtenerFormulariosCompletados2(int encuestadorId, int offset, int limit) {
         List<EncuestaAsignada> encuestasCompletadas = new ArrayList<>();
         String sql = "SELECT ea.asignacion_id, e.encuesta_id, e.nombre AS nombre_encuesta, " +
                 "e.descripcion, ea.fecha_asignacion, ea.fecha_completado,e.estado,ea.estado, " +
@@ -170,11 +172,13 @@ public class EncuestaDAO extends BaseDAO {
                 "JOIN usuarios u_coord ON ea.coordinador_id = u_coord.usuario_id " +
                 "JOIN usuarios u_encuest ON ea.encuestador_id = u_encuest.usuario_id " +
                 "WHERE ea.encuestador_id = ? "+
-                "ORDER BY ea.fecha_asignacion DESC;";
+                "ORDER BY ea.fecha_asignacion DESC LIMIT ? OFFSET ?;";
 
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, encuestadorId);
+            pstmt.setInt(2, limit);
+            pstmt.setInt(3, offset);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     EncuestaAsignada encuestaAsignada = new EncuestaAsignada();
@@ -204,6 +208,29 @@ public class EncuestaDAO extends BaseDAO {
         }
         return encuestasCompletadas;
     }
+    public int contarEncuestasAsignadas(int encuestadorId, String estado) {
+        String sql = "SELECT COUNT(*) FROM encuestas_asignadas WHERE encuestador_id = ?";
+        if (estado != null && !estado.isEmpty()) {
+            sql += " AND estado = ?";
+        }
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, encuestadorId);
+            if (estado != null && !estado.isEmpty()) {
+                pstmt.setString(2, estado);
+            }
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
     public String obtenerCoordinador(int coordinadorId) {
 
         String sql = "SELECT nombre from usuarios where usuario_id = ?";
@@ -220,6 +247,24 @@ public class EncuestaDAO extends BaseDAO {
             e.printStackTrace();
         }
         return nombreCoordinador;
+    }
+    public int contarFormulariosCompletados1(int encuestadorId, String estado) {
+        String sql = "SELECT COUNT(*) FROM encuestas_asignadas WHERE encuestador_id = ? AND estado = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, encuestadorId);
+            pstmt.setString(2, estado);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     // A partir de acá se realizo los nuevos metodos para la sección de coordinador

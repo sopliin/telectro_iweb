@@ -13,15 +13,11 @@ import jakarta.servlet.http.HttpSession;
 import org.example.onu_mujeres_crud.dtos.EstadisticasEncuestadorDTO;
 import org.example.onu_mujeres_crud.dtos.EstadisticasZonaDTO;
 
-import java.io.File;
+import java.io.*;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.HashMap;
 
@@ -55,28 +51,31 @@ public class CoordinadorServlet extends HttpServlet {
             case "lista":
                 Usuario coordinadorSesion = (Usuario) request.getSession().getAttribute("usuario");
                 if (coordinadorSesion == null || coordinadorSesion.getZona() == null) {
-                    response.sendRedirect(request.getContextPath() +"/login");
+                    response.sendRedirect(request.getContextPath() + "/login");
                     return;
                 }
+
                 int zonaId = coordinadorSesion.getZona().getZonaId();
-                ArrayList<Usuario> listaEncuestadores = coordinadorDAO.listarEncuestadoresPorZona(zonaId);
+                ArrayList<Usuario> todosEncuestadores = coordinadorDAO.listarEncuestadoresPorZona(zonaId);
 
-                // Agrega esta línea para obtener los distritos de la zona asignada
+                // Reutilizar paginación
+                aplicarPaginacion(request, todosEncuestadores, 8); // Puedes ajustar la cantidad por página
+
+                // Otros atributos
                 ArrayList<Distrito> listaDistritos = coordinadorDAO.listarDistritosPorZona(zonaId);
-                request.setAttribute("listaDistritos", listaDistritos);
-
                 ArrayList<Zona> listaZonas = new ArrayList<>();
                 listaZonas.add(coordinadorSesion.getZona());
 
-                request.setAttribute("listaEncuestadores", listaEncuestadores);
+                request.setAttribute("listaDistritos", listaDistritos);
                 request.setAttribute("listaZonas", listaZonas);
 
-                view = request.getRequestDispatcher("/onu_mujeres/static/coordinador_encuestadores.jsp");
+                view = request.getRequestDispatcher("/Coordinador/coordinador_encuestadores.jsp");
                 view.forward(request, response);
                 break;
+
             // ver su perfil (coordinador)
             case "verPerfil":
-                view = request.getRequestDispatcher("/onu_mujeres/static/coordinador_ver_tu_perfil.jsp");
+                view = request.getRequestDispatcher("/Coordinador/coordinador_ver_tu_perfil.jsp");
                 view.forward(request, response);
                 break;
             case "editarPerfil":
@@ -99,12 +98,14 @@ public class CoordinadorServlet extends HttpServlet {
                 request.setAttribute("zonaIdFiltro", zonaIdFiltro);
                 request.setAttribute("distritoIdFiltro", distritoIdFiltro);
 
-                view = request.getRequestDispatcher("/onu_mujeres/static/coordinador_ver_otro_perfil.jsp");
+                view = request.getRequestDispatcher("/Coordinador/coordinador_ver_otro_perfil.jsp");
                 view.forward(request, response);
                 break;
 
             // Prepara los parametros que apareceran en la vista "asignarFormulario"
             case "asignarFormulario":
+
+                System.out.println("Aquí llega sin problemas");
 
                 int idEncuestador = Integer.parseInt(request.getParameter("id"));
                 encuestador = coordinadorDAO.obtenerEncuestadorPorId(idEncuestador);
@@ -135,24 +136,25 @@ public class CoordinadorServlet extends HttpServlet {
                 request.setAttribute("zonaIdFiltro", request.getParameter("zonaId"));
                 request.setAttribute("distritoIdFiltro", request.getParameter("distritoId"));
 
-                view = request.getRequestDispatcher("/onu_mujeres/static/coordinador_asignar_encuestas_sc_encuestadores.jsp");
+                view = request.getRequestDispatcher("/Coordinador/coordinador_asignar_encuestas_sc_encuestadores.jsp");
                 view.forward(request, response);
                 break;
 
                 // Obtener parámetros del filtro (encuestadores) en la vista ListaVistaEncuestador.jsp
             case "filtrar":
-                // se obtiene el id de la zona del coordinador de la sesión
                 Usuario coordinadorSesionFiltrar = (Usuario) request.getSession().getAttribute("usuario");
                 if (coordinadorSesionFiltrar == null || coordinadorSesionFiltrar.getZona() == null) {
-                    response.sendRedirect(request.getContextPath() +"/login");
+                    response.sendRedirect(request.getContextPath() + "/login");
                     return;
                 }
+
                 int zonaIdFiltrar = coordinadorSesionFiltrar.getZona().getZonaId();
 
-                // Obtener distritos de la zona asignada
+                // Cargar lista de distritos para el filtro
                 ArrayList<Distrito> listaDistritosFiltrar = coordinadorDAO.listarDistritosPorZona(zonaIdFiltrar);
                 request.setAttribute("listaDistritos", listaDistritosFiltrar);
 
+                // Obtener encuestadores según filtro
                 String distritoIdStrFiltrar = request.getParameter("distritoId");
                 ArrayList<Usuario> listaEncuestadoresFiltrar;
 
@@ -164,12 +166,13 @@ public class CoordinadorServlet extends HttpServlet {
                     listaEncuestadoresFiltrar = coordinadorDAO.listarEncuestadoresPorZona(zonaIdFiltrar);
                 }
 
-                request.setAttribute("listaEncuestadores", listaEncuestadoresFiltrar);
+                // Reutilizar paginación
+                aplicarPaginacion(request, listaEncuestadoresFiltrar, 8); // Ajusta el tamaño de página si deseas
 
-                view = request.getRequestDispatcher("/onu_mujeres/static/coordinador_encuestadores.jsp");
+                // Redirigir a la misma vista
+                view = request.getRequestDispatcher("/Coordinador/coordinador_encuestadores.jsp");
                 view.forward(request, response);
                 break;
-
 
             // ----Encuestas -----
             // Ver encuestas de la vista coordinador
@@ -188,23 +191,14 @@ public class CoordinadorServlet extends HttpServlet {
                 request.setAttribute("listaCarpetas", carpetas);
                 request.setAttribute("carpetaSeleccionada", carpetaSeleccionada);
 
-                view = request.getRequestDispatcher("/onu_mujeres/static/coordinador_encuestas.jsp");
-                view.forward(request, response);
-                break;
-
-            // Ver perfil de encuesta
-            case "verEncuesta":
-                int idEncuesta = Integer.parseInt(request.getParameter("id"));
-                Encuesta encuesta = encuestaDAO.obtenerEncuestaPorId(idEncuesta);
-                request.setAttribute("encuesta", encuesta);
-                view = request.getRequestDispatcher("Coordinador/verEncuesta.jsp");
+                view = request.getRequestDispatcher("/Coordinador/coordinador_encuestas.jsp");
                 view.forward(request, response);
                 break;
 
             // filtrar por distrito para asignar formulario a encuestador
             case "filtrarAsignar":
                 if (coordinador == null || coordinador.getZona() == null) {
-                    response.sendRedirect(request.getContextPath() +"/login");
+                    response.sendRedirect(request.getContextPath() + "/login");
                     return;
                 }
                 zonaId = coordinador.getZona().getZonaId();
@@ -215,6 +209,8 @@ public class CoordinadorServlet extends HttpServlet {
 
                 // Filtro de distrito
                 String distritoFiltrarIdStr = request.getParameter("distritoId");
+                ArrayList<Usuario> listaEncuestadores;
+
                 if (distritoFiltrarIdStr != null && !distritoFiltrarIdStr.isEmpty()) {
                     int distritoId = Integer.parseInt(distritoFiltrarIdStr);
                     listaEncuestadores = coordinadorDAO.obtenerTodosEncuestadoresPorZonaYDistrito(zonaId, distritoId);
@@ -227,11 +223,10 @@ public class CoordinadorServlet extends HttpServlet {
                 listaZonas = new ArrayList<>();
                 listaZonas.add(coordinador.getZona());
 
-                // Pasar parámetros extra si los necesitas en el JSP
+                // Parámetros extra para mantener el estado de selección en la vista
                 String encuestaIdStr = request.getParameter("encuestaId");
                 String carpetaParam = request.getParameter("carpeta");
 
-                // Si se pasa un ID de encuesta, obtener la encuesta y pasarla al request
                 if (encuestaIdStr != null && !encuestaIdStr.isEmpty()) {
                     int encuestaId = Integer.parseInt(encuestaIdStr);
                     Encuesta encuestaSeleccionada = encuestaDAO.obtenerEncuestaPorId(encuestaId);
@@ -239,32 +234,75 @@ public class CoordinadorServlet extends HttpServlet {
                     request.setAttribute("encuestaId", encuestaIdStr);
                 }
 
-                // Asegura que siempre se setea el atributo para el JSP
                 request.setAttribute("carpetaSeleccionada", carpetaParam != null ? carpetaParam : "");
-
-                // enviamos al jsp como atributo
                 request.setAttribute("zonaSeleccionada", zonaId);
-                request.setAttribute("listaEncuestadores", listaEncuestadores);
                 request.setAttribute("listaZonas", listaZonas);
 
-                view = request.getRequestDispatcher("/onu_mujeres/static/coordinador_asignar_encuestas_sc_encuestas.jsp");
+                // Aquí aplicas la paginación como en "filtrar"
+                aplicarPaginacion(request, listaEncuestadores, 8); // 4 elementos por página
+
+                view = request.getRequestDispatcher("/Coordinador/coordinador_asignar_encuestas_sc_encuestas.jsp");
                 view.forward(request, response);
                 break;
             case "dashboard":
 
                 ArrayList<EstadisticasEncuestadorDTO> statsEncuestadores = coordinadorDAO.obtenerEstadisticasPorEncuestador(coordinador.getUsuarioId());
                 ArrayList<EstadisticasZonaDTO> statsZonas = coordinadorDAO.obtenerEstadisticasPorZona(coordinador.getUsuarioId());
-
-                request.setAttribute("statsEncuestadores", statsEncuestadores);
                 request.setAttribute("statsZonas", statsZonas);
+                request.setAttribute("statsEncuestadores", statsEncuestadores);
                 request.getRequestDispatcher("/Coordinador/dashboard.jsp").forward(request, response);
 
                 break;
 
             // --MENU--
             case "subirexcel":
+                encuestas = encuestaDAO.obtenerEncuestasPorCarpeta("");
+                request.setAttribute("listaEncuestas", encuestas);
                 view = request.getRequestDispatcher("/Coordinador/subirExcelRespuestas.jsp");
                 view.forward(request, response);
+                break;
+
+            case "descargarFormatoExcel":
+                String nombreArchivo = request.getParameter("nombreArchivo");
+
+                if (nombreArchivo == null || nombreArchivo.isEmpty()) {
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Parámetro 'nombreArchivo' es requerido.");
+                    return;
+                }
+
+                // La ruta base ahora es la carpeta 'Coordinador' dentro de 'webapp'
+                String rutaBaseCoordinador = getServletContext().getRealPath("/Coordinador/");
+                File archivo = new File(rutaBaseCoordinador, nombreArchivo);
+
+                if (!archivo.exists()) {
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "El archivo '" + nombreArchivo + "' no se encontró en la ruta: " + rutaBaseCoordinador);
+                    return;
+                }
+
+                response.setHeader("Content-Disposition", "attachment; filename=\"" + archivo.getName() + "\"");
+
+                String mimeType = getServletContext().getMimeType(archivo.getName());
+                if (mimeType == null) {
+                    mimeType = "application/octet-stream";
+                }
+                response.setContentType(mimeType);
+
+                response.setContentLength((int) archivo.length());
+
+                try (FileInputStream in = new FileInputStream(archivo);
+                     OutputStream out = response.getOutputStream()) {
+
+                    byte[] buffer = new byte[4096];
+                    int bytesRead = -1;
+                    while ((bytesRead = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, bytesRead);
+                    }
+                } catch (IOException e) {
+                    System.err.println("Error al descargar el archivo: " + e.getMessage());
+                    e.printStackTrace();
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error interno al procesar la descarga del archivo.");
+                }
+
                 break;
 
             default:
@@ -357,14 +395,18 @@ public class CoordinadorServlet extends HttpServlet {
                 coordinadorDAO.cambiarEstadoEncuestador(idEstado, nuevoEstado);
                 String zonaIdParam = request.getParameter("zonaId");
                 String distritoIdParam = request.getParameter("distritoId");
+                String pageParam = request.getParameter("page");
 
-                redirectUrl = request.getContextPath() +"/CoordinadorServlet?action=filtrar";
+                redirectUrl = request.getContextPath() + "/CoordinadorServlet?action=filtrar";
 
                 if (zonaIdParam != null && !zonaIdParam.isEmpty()) {
                     redirectUrl += "&zonaId=" + zonaIdParam;
                 }
                 if (distritoIdParam != null && !distritoIdParam.isEmpty()) {
                     redirectUrl += "&distritoId=" + distritoIdParam;
+                }
+                if (pageParam != null && !pageParam.isEmpty()) {
+                    redirectUrl += "&page=" + pageParam;
                 }
                 response.sendRedirect(redirectUrl);
                 break;
@@ -407,7 +449,6 @@ public class CoordinadorServlet extends HttpServlet {
                             }
                         }
 
-                        // 1. Crear la EncuestaAsignada para esta carga de respuestas, pasando el coordinadorId de la sesión
                         int asignacionId = encuestaAsignadaDAO.crearAsignacionParaImportacion(encuestaId1, coordinadorId);
 
                         if (asignacionId > 0) {
@@ -420,16 +461,17 @@ public class CoordinadorServlet extends HttpServlet {
                                 if (rowIterator.hasNext()) {
                                     rowIterator.next();
                                 } else {
-                                    // Manejo de error si el archivo tiene menos de 6 filas
                                     System.err.println("Advertencia: El archivo Excel tiene menos de 6 filas para procesar.");
                                     request.getSession().setAttribute("error", "El archivo Excel no contiene suficientes filas de datos (mínimo fila 6).");
-                                    //response.sendRedirect(request.getContextPath() + "/admin/subirExcelRespuestas.jsp");
-                                    response.sendRedirect(request.getContextPath() +"/CoordinadorServlet?action=subirexcel");
+                                    response.sendRedirect(request.getContextPath() + "/CoordinadorServlet?action=subirexcel");
                                     return;
                                 }
                             }
 
+                            List<String> dnisProcesadosEnArchivo = new ArrayList<>();
+                            boolean noDni=false;
                             while (rowIterator.hasNext()) {
+                                noDni=false;
                                 Row currentRow = rowIterator.next();
 
                                 String dniEncuestado = getCellValue(currentRow.getCell(0));
@@ -438,8 +480,18 @@ public class CoordinadorServlet extends HttpServlet {
 
                                 if (dniEncuestado == null || dniEncuestado.trim().isEmpty()) {
                                     System.err.println("Advertencia: Se encontró una fila sin DNI. Se omitirá.");
+                                    noDni=true;
                                     continue;
                                 }
+
+                                if (dnisProcesadosEnArchivo.contains(dniEncuestado)) {
+                                    request.getSession().setAttribute("error", "Error durante la importación: el DNI '" + dniEncuestado + "' está duplicado dentro del archivo Excel.");
+                                    response.sendRedirect(request.getContextPath() + "/CoordinadorServlet?action=subirexcel");
+                                    return;
+                                } else {
+                                    dnisProcesadosEnArchivo.add(dniEncuestado);
+                                }
+
                                 if (fechaInicio == null || fechaInicio.trim().isEmpty()) {
                                     fechaInicio = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                                     System.err.println("Advertencia: Fecha de inicio vacía para DNI " + dniEncuestado + ". Usando fecha actual.");
@@ -449,8 +501,21 @@ public class CoordinadorServlet extends HttpServlet {
                                     System.err.println("Advertencia: Fecha de envío vacía para DNI " + dniEncuestado + ". Usando fecha actual.");
                                 }
 
-                                // 2. Guardar la respuesta principal (Respuesta)
-                                int respuestaId = respuestaDAO.guardarRespuestaPrincipal(dniEncuestado, asignacionId, fechaInicio, fechaEnvio);
+                                int respuestaId;
+                                try {
+                                    respuestaId = respuestaDAO.guardarRespuestaPrincipal(dniEncuestado, asignacionId, fechaInicio, fechaEnvio);
+                                } catch (SQLException e) {
+                                    if (e.getMessage() != null && e.getMessage().contains("Incorrect datetime value")) {
+                                        request.getSession().setAttribute("error", "Error durante la importación: el formato de la fecha es incorrecto - [línea asociada al DNI '" + dniEncuestado + "']: el formato correcto es DD/MM/AAAA HH:MM:SS.");
+                                    } else if (e.getMessage() != null && e.getMessage().contains("Duplicate entry") && e.getMessage().contains("dni_encuestado_UNIQUE")) {
+                                        request.getSession().setAttribute("error", "Error durante la importación: el DNI '" + dniEncuestado + "' está con un valor duplicado.");
+                                    } else {
+                                        request.getSession().setAttribute("error", "Error de base de datos durante la importación para DNI '" + dniEncuestado + "': " + e.getMessage());
+                                    }
+                                    e.printStackTrace();
+                                    response.sendRedirect(request.getContextPath() + "/CoordinadorServlet?action=subirexcel");
+                                    return;
+                                }
 
                                 if (respuestaId > 0) {
                                     List<RespuestaDetalle> detallesRespuestas = new ArrayList<>();
@@ -473,21 +538,23 @@ public class CoordinadorServlet extends HttpServlet {
                                             if (pregunta.getTipo().equals("opcion_unica") || pregunta.getTipo().equals("opcion_multiple")) {
                                                 ArrayList<PreguntaOpcion> opciones = opcionesPorPreguntaId.get(pregunta.getPreguntaId());
                                                 if (opciones != null && cellValue != null && !cellValue.trim().isEmpty()) {
+                                                    PreguntaOpcion opcionSeleccionada = null;
                                                     for (PreguntaOpcion op : opciones) {
-                                                        System.out.println(op.getOpcionId());
-                                                        if (1==1) {
-                                                            // detalle.setRespuestaTexto(op.getTextoOpcion());
-                                                            detalle.setOpcion(op);
-                                                            System.out.println("Respuesta de opción: " + op.getTextoOpcion() + " (ID: " + op.getOpcionId() + ")");
-
+                                                        if (op.getTextoOpcion().equalsIgnoreCase(cellValue.trim())) {
+                                                            opcionSeleccionada = op;
                                                             break;
                                                         }
                                                     }
-
+                                                    if (opcionSeleccionada != null) {
+                                                        detalle.setOpcion(opcionSeleccionada);
+                                                    } else {
+                                                        detalle.setRespuestaTexto(cellValue);
+                                                    }
+                                                } else {
+                                                    detalle.setRespuestaTexto(cellValue);
                                                 }
                                             } else {
                                                 detalle.setRespuestaTexto(cellValue);
-                                                System.out.println("Respuesta de texto: " + cellValue);
                                             }
                                             detallesRespuestas.add(detalle);
                                         }
@@ -500,7 +567,13 @@ public class CoordinadorServlet extends HttpServlet {
                                 }
                             }
                             workbook.close();
-                            request.getSession().setAttribute("info", "Respuestas de Excel importadas exitosamente.");
+                            if(noDni){
+                                request.getSession().setAttribute("error", "No hubo ninguna entrada con dni ");
+
+                            }else{
+                                request.getSession().setAttribute("info", "Respuestas de Excel importadas exitosamente.");
+                            }
+
                         } else {
                             request.getSession().setAttribute("error", "Error al crear la asignación de encuesta para la importación.");
                         }
@@ -510,14 +583,13 @@ public class CoordinadorServlet extends HttpServlet {
                 } catch (NumberFormatException e) {
                     request.getSession().setAttribute("error", "Error: El ID de la encuesta debe ser un número válido.");
                     e.printStackTrace();
-                } catch (SQLException e) {
-                    request.getSession().setAttribute("error", "Error de base de datos durante la importación: " + e.getMessage());
-                    e.printStackTrace();
                 } catch (Exception e) {
                     request.getSession().setAttribute("error", "Error inesperado durante la importación: " + e.getMessage());
                     e.printStackTrace();
                 }
-                response.sendRedirect(request.getContextPath() +"/CoordinadorServlet?action=subirexcel");
+
+
+                response.sendRedirect(request.getContextPath() + "/CoordinadorServlet?action=subirexcel");
                 break;
 
             case "uploadPhoto":
@@ -552,7 +624,7 @@ public class CoordinadorServlet extends HttpServlet {
         ArrayList<Distrito> distritos = distritoDAO.obtenerListaDistritosxZona(zonaid);
 
         request.setAttribute("distritos", distritos);
-        RequestDispatcher view = request.getRequestDispatcher("/onu_mujeres/static/editar_perfil.jsp");
+        RequestDispatcher view = request.getRequestDispatcher("/Coordinador/editar_perfil.jsp");
         view.forward(request, response);
     }
 
@@ -568,7 +640,7 @@ public class CoordinadorServlet extends HttpServlet {
             return;
         }
 
-        RequestDispatcher view = request.getRequestDispatcher("/onu_mujeres/static/coordinador_cambiar_contrasena.jsp");
+        RequestDispatcher view = request.getRequestDispatcher("/Coordinador/coordinador_cambiar_contrasena.jsp");
         view.forward(request, response);
     }
 
@@ -590,7 +662,7 @@ public class CoordinadorServlet extends HttpServlet {
         if (filePart == null || filePart.getSize() == 0) {
             System.out.println("no seleccioo una foto");
             request.setAttribute("error", "No se seleccionó una foto.");
-            request.getRequestDispatcher("/onu_mujeres/static/coordinador_ver_tu_perfil.jsp").forward(request, response);
+            request.getRequestDispatcher("/Coordinador/coordinador_ver_tu_perfil.jsp").forward(request, response);
             return;
         }
 
@@ -600,7 +672,7 @@ public class CoordinadorServlet extends HttpServlet {
         if (extension == null) {
             System.out.println("no seleccioo no peritido");
             request.setAttribute("error", "Tipo de archivo no permitido.");
-            request.getRequestDispatcher("/onu_mujeres/static/coordinador_ver_tu_perfil.jsp").forward(request, response);
+            request.getRequestDispatcher("/Coordinador/coordinador_ver_tu_perfil.jsp").forward(request, response);
             return;
         }
 
@@ -762,8 +834,36 @@ public class CoordinadorServlet extends HttpServlet {
             default -> null;
         };
     }
+    
+    private void aplicarPaginacion(HttpServletRequest request, List<Usuario> listaTotal, int pageSize) {
+        int pagina = 1;
+        if (request.getParameter("page") != null) {
+            try {
+                pagina = Integer.parseInt(request.getParameter("page"));
+            } catch (NumberFormatException ignored) {}
+        }
 
+        int total = listaTotal.size();
+        int totalPaginas = (int) Math.ceil((double) total / pageSize);
+        if (totalPaginas == 0) totalPaginas = 1;
+
+        int start = (pagina - 1) * pageSize;
+        int end = Math.min(start + pageSize, total);
+
+        // Validación extra por seguridad
+        if (start > end) start = end;
+        if (start < 0) start = 0;
+        if (end > total) end = total;
+
+        List<Usuario> listaPaginada = listaTotal.subList(start, end);
+
+        request.setAttribute("listaEncuestadores", listaPaginada);
+        request.setAttribute("paginaActual", pagina);
+        request.setAttribute("totalPaginas", totalPaginas);
+    }
 }
+
+
 
 //package org.example.onu_mujeres_crud.servlet;
 //

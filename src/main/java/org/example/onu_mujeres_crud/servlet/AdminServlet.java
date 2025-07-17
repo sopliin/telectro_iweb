@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -34,18 +36,18 @@ import java.util.Map;
 )
 public class AdminServlet extends HttpServlet {
 
-    private static final int REGISTROS_POR_PAGINA = 10;
-    private static final int DEFAULT_REGISTROS_POR_PAGINA = 10;
+    private static final int DEFAULT_REGISTROS_POR_PAGINA = 7;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+        manejarEstadoSidebar(request);
         HttpSession session = request.getSession();
         Usuario user = (Usuario) session.getAttribute("usuario");
 
         //Verificar sesion y rol de admin
         if (user == null || user.getRol().getRolId() != 3) {
-            response.sendRedirect("index.jsp?error=notLoggedIn");
+            System.out.println("primer if get admin");
+            response.sendRedirect("login.jsp?error=notLoggedIn");
             return;
         }
 
@@ -55,8 +57,6 @@ public class AdminServlet extends HttpServlet {
         switch (action) {
             case "dashboard":
                 //Logica para dashboard
-                //view = request.getRequestDispatcher("admin/dashboard.jsp");
-                //view.forward(request, response);
                 cargarDashboard(request, response);
                 break;
 
@@ -85,8 +85,10 @@ public class AdminServlet extends HttpServlet {
                 // Obtener registros por página
                 int registrosPorPagina = DEFAULT_REGISTROS_POR_PAGINA;
                 try {
+
                     registrosPorPagina = Integer.parseInt(request.getParameter("registrosPorPagina"));
                 } catch (NumberFormatException e) {
+                    System.out.println("no pasa las paginas");
                     // Si no viene parámetro o es inválido, usa el valor por defecto
                 }
 
@@ -112,7 +114,7 @@ public class AdminServlet extends HttpServlet {
                 request.setAttribute("totalUsuarios", totalUsuarios);
                 request.setAttribute("registrosPorPagina", registrosPorPagina);
 
-                view = request.getRequestDispatcher("admin/lista.jsp");
+                view = request.getRequestDispatcher("/admin/listaRod.jsp");
                 view.forward(request, response);
                 break;
 
@@ -140,14 +142,16 @@ public class AdminServlet extends HttpServlet {
                 int usuarioIdDesactivar = Integer.parseInt(request.getParameter("id"));
                 UsuarioAdminDao adminDao = new UsuarioAdminDao();
                 adminDao.desactivarUsuario(usuarioIdDesactivar);
-                response.sendRedirect(request.getContextPath() +"/AdminServlet?action=listaUsuarios");
+                //response.sendRedirect(request.getContextPath() +"/AdminServlet?action=listaUsuarios");
+                response.sendRedirect(construirURLRedireccion(request));
                 break;
 
             case "activarUsuario":
                 int usuarioIdActivar = Integer.parseInt(request.getParameter("id"));
                 UsuarioAdminDao adminDaoAct = new UsuarioAdminDao();
                 adminDaoAct.activarUsuario(usuarioIdActivar);
-                response.sendRedirect(request.getContextPath() +"/AdminServlet?action=listaUsuarios");
+                //response.sendRedirect(request.getContextPath() +"/AdminServlet?action=listaUsuarios");
+                response.sendRedirect(construirURLRedireccion(request));
                 break;
             case "detallesUsuario":
                 UsuarioDAO usuarioDao = new UsuarioDAO();
@@ -167,48 +171,16 @@ public class AdminServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+        manejarEstadoSidebar(request);
         String action = request.getParameter("action");
         HttpSession session = request.getSession();
         Usuario user = (Usuario) session.getAttribute("usuario");
 
         if (user == null || user.getRol().getRolId() != 3) {
-            response.sendRedirect("index.jsp?error=notLoggedIn");
+            System.out.println("primer if post admin");
+            response.sendRedirect("login.jsp?error=notLoggedIn");
             return;
         }
-
-//        usuario.setNombre(request.getParameter("nombre"));
-//        usuario.setApellidoPaterno(request.getParameter("apellidoPaterno"));
-//        usuario.setApellidoMaterno(request.getParameter("apellidoMaterno"));
-//        usuario.setDni(request.getParameter("dni"));
-//        usuario.setCorreo(request.getParameter("correo"));
-//
-//        Rol rol = new Rol();
-//        rol.setRolId(2);    //Rol de Coordinador
-//        usuario.setRol(rol);
-//
-//        //Capturar zona-id desde el form
-//        Zona zona = new Zona();
-//        zona.setZonaId(Integer.parseInt(request.getParameter("zonaId")));
-//        usuario.setZona(zona);
-//
-//        //Capturar Distrito-id desde el form
-//        Distrito distrito = new Distrito();
-//        distrito.setDistritoId(Integer.parseInt(request.getParameter("distritoId")));
-//        usuario.setDistrito(distrito);
-//
-//        try {
-//            //Validar dni unico
-//            if(usuarioDAO.existeDNI(usuario.getDni())) {
-//                request.setAttribute("error", "Ya existe un Coordinador Interno con ese DNI.");
-//                request.getRequestDispatcher("admin/formularioNuevo.jsp").forward(request, response);
-//                return;
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//            request.setAttribute("error", "Error al registrar nuevo coordinador");
-//            request.getRequestDispatcher("admin/formularioNuevo.jsp").forward(request, response);
-//        }
 
         switch (action) {
             case "crearCoordinador":
@@ -259,7 +231,7 @@ public class AdminServlet extends HttpServlet {
                 if (adminDao.crearUsuario1(coordinador)) {
                     TokenDAO tokenDao = new TokenDAO();
                     String token = tokenDao.generateToken(coordinador.getCorreo());
-                    String validationLink = request.getRequestURL().toString().replace(request.getServletPath(), "") + "/login?action=validate_email&token=" + token;
+                    String validationLink = "http://localhost:8080" + "/login?action=validate_email&token=" + token;
                     String emailBody = "Por favor valide su correo haciendo clic en el siguiente enlace:\n" + validationLink;
                     System.out.println(request.getRequestURL().toString().replace(request.getServletPath(), ""));
                     System.out.println(request.getContextPath());
@@ -267,13 +239,10 @@ public class AdminServlet extends HttpServlet {
                     session.setAttribute("success", "Se envio el correo al coordinador con exito al correo "+coordinador.getCorreo());
                     response.sendRedirect(request.getContextPath() +"/AdminServlet?action=nuevoCoordinador");
 
-
                 } else {
                     session.setAttribute("error", "creacion fallida ");
                     response.sendRedirect(request.getContextPath() +"/AdminServlet?action=nuevoCoordinador");
                 }
-                //adminDao.registrarCoordinador(coordinador);
-                //response.sendRedirect("AdminServlet?action=listaUsuarios&sucess=1");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -320,6 +289,7 @@ public class AdminServlet extends HttpServlet {
 
         response.sendRedirect(request.getContextPath() +"/AdminServlet?action=cambiarContrasena");
     }
+
     private void subirFoto(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -327,7 +297,7 @@ public class AdminServlet extends HttpServlet {
         Usuario usuario = (Usuario) session.getAttribute("usuario");
 
         if (usuario == null) {
-            System.out.println("ultimo encuestador");
+            System.out.println("ultimo encuestador666foto");
             response.sendRedirect("login.jsp");
             return;
         }
@@ -384,12 +354,10 @@ public class AdminServlet extends HttpServlet {
                 output.write(buffer, 0, bytes);
             }
         }
-        System.out.println("pasa para subir foto");
 
         // Actualizar en la base de datos
         UsuarioDAO usuarioDAO = new UsuarioDAO();
         usuarioDAO.actualizarFotoPerfil(usuario.getUsuarioId(), nombreArchivo);
-        System.out.println(" nuevo foto para la sesion "+nombreArchivo);
         // Actualizar sesión
         usuario.setProfilePhotoUrl(nombreArchivo);
         session.setAttribute("usuario", usuario);
@@ -441,16 +409,12 @@ public class AdminServlet extends HttpServlet {
         try {
             UsuarioAdminDao adminDao = new UsuarioAdminDao();
             ArrayList<Usuario> usuarios = adminDao.obtenerUsuariosParaReporte(tipoReporte);
-
             // Configurar respuesta
             response.setContentType("application/vnd.ms-excel");
             response.setHeader("Content-Disposition", "attachment; filename=reporte_" + nombreReporte +".xlsx");
-//            response.setHeader("Content-Disposition", "attachment; filename=reporte_usuarios.xlsx");
-
             // Crear libro Excel
             Workbook workbook = new XSSFWorkbook();
             Sheet sheet = workbook.createSheet("Usuarios");
-
             // Crear fila de encabezados
             Row headerRow = sheet.createRow(0);
             String[] headers = {"ID", "Nombre", "Apellidos", "DNI", "Correo", "Rol", "Zona", "Distrito","Código único de Encuestador", "Estado", "Fecha Registro"};
@@ -458,7 +422,6 @@ public class AdminServlet extends HttpServlet {
                 Cell cell = headerRow.createCell(i);
                 cell.setCellValue(headers[i]);
             }
-
             // Llenar datos
             int rowNum = 1;
             for (Usuario usuario : usuarios) {
@@ -477,18 +440,20 @@ public class AdminServlet extends HttpServlet {
                         codigoUnico != null && !codigoUnico.isEmpty() ? codigoUnico : "No aplica"
                 );
                 row.createCell(9).setCellValue(usuario.getEstado());
-                row.createCell(10).setCellValue(usuario.getFechaRegistro());
+                String fechaOriginal = usuario.getFechaRegistro();
+                DateTimeFormatter formatoEntrada = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                LocalDateTime fecha = LocalDateTime.parse(fechaOriginal, formatoEntrada);
+                DateTimeFormatter formatoSalida = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+                String fechaFormateada = fecha.format(formatoSalida);
+                row.createCell(10).setCellValue(fechaFormateada);
             }
-
             // Autoajustar columnas
             for (int i = 0; i < headers.length; i++) {
                 sheet.autoSizeColumn(i);
             }
-
             // Escribir archivo
             workbook.write(response.getOutputStream());
             workbook.close();
-
         } catch (Exception e) {
             e.printStackTrace();
             try {
@@ -497,5 +462,38 @@ public class AdminServlet extends HttpServlet {
                 ex.printStackTrace();
             }
         }
+    }
+    private String construirURLRedireccion(HttpServletRequest request) {
+        StringBuilder url = new StringBuilder("AdminServlet?action=listaUsuarios");
+
+        // Añadir parámetros de filtro si existen
+        String[] params = {"filtroRol", "filtroEstado", "filtroBusqueda", "page", "registrosPorPagina"};
+        for (String param : params) {
+            String value = request.getParameter(param);
+            if (value != null && !value.isEmpty()) {
+                url.append("&").append(param).append("=").append(value);
+            }
+        }
+
+        return url.toString();
+    }
+
+    private void manejarEstadoSidebar(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+
+        // Verificar si se está cambiando el estado del sidebar
+        String toggleParam = request.getParameter("toggleSidebar");
+        if (toggleParam != null) {
+            boolean newState = "true".equals(toggleParam);
+            session.setAttribute("sidebarAbierto", newState);
+        }
+
+        // Establecer estado por defecto si no existe
+        if (session.getAttribute("sidebarAbierto") == null) {
+            session.setAttribute("sidebarAbierto", true); // Abierto por defecto
+        }
+
+        // Pasar el estado a la vista
+        request.setAttribute("sidebarAbierto", session.getAttribute("sidebarAbierto"));
     }
 }

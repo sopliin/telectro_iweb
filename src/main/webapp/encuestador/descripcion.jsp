@@ -8,7 +8,7 @@
 <html>
 <head>
     <title>Perfil de usuario</title>
-    <link href="${pageContext.request.contextPath}/onu_mujeres/static/css/app.css" rel="stylesheet">
+    <link href="<%=request.getContextPath()%>/onu_mujeres/static/css/app.css" rel="stylesheet">
     <style>
         .profile-card {
             max-width: 600px;
@@ -47,6 +47,6 @@
         </div>
     </div>
 </main>
-<script src="${pageContext.request.contextPath}/onu_mujeres/static/js/app.js"></script>
+<script src="<%=request.getContextPath()%>/onu_mujeres/static/js/app.js"></script>
 </body>
 </html>

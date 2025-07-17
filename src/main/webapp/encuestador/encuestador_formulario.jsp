@@ -17,11 +17,39 @@
 
 	<link rel="canonical" href="https://demo-basic.adminkit.io/" />
 
-	<link rel="stylesheet" type="text/css" href="http://localhost:8080/onu_mujeres_crud_war_exploded/onu_mujeres/static/css/app.css">
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/onu_mujeres/static/css/app.css">
 	<title>AdminKit Demo - Bootstrap 5 Admin Template</title>
 
 	<link href="css/app.css" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+	<style>
+
+
+		.footer .row {
+			flex-wrap: wrap; /* Permite que los elementos se ajusten en móviles */
+		}
+
+		.footer .col-6 {
+			width: 100% !important; /* Ocupa todo el ancho en móviles */
+			text-align: center !important; /* Centra el texto */
+			margin-bottom: 0.5rem; /* Espacio entre elementos */
+		}
+
+		.footer .list-inline {
+
+			flex-wrap: wrap; /* Permite que los ítems se ajusten */
+		}
+
+		.footer .list-inline-item {
+			margin: 0 0.5rem; /* Espacio entre ítems */
+		}
+
+
+
+
+
+
+	</style>
 </head>
 
 <body>
@@ -31,18 +59,15 @@
 			<a class="sidebar-brand" href="EncuestadorServlet?action=total">
 				<span class="align-middle">ONU Mujeres</span>
 			</a>
-
 			<ul class="sidebar-nav">
 				<li class="sidebar-header">
 					Encuestas
 				</li>
-
 				<li class="sidebar-item">
 					<a class="sidebar-link" href="EncuestadorServlet?action=total">
 						<i class="align-middle" data-feather="list"></i> <span class="align-middle">Encuestas totales</span>
 					</a>
 				</li>
-
 				<li class="sidebar-item">
 					<a class="sidebar-link" href="EncuestadorServlet?action=total">
 						<i class="align-middle" data-feather="check"></i> <span class="align-middle">Encuestas completadas</span>
@@ -60,14 +85,7 @@
 						<i class="align-middle" data-feather="edit-3"></i> <span class="align-middle">Encuestas por hacer</span>
 					</a>
 				</li>
-
-
-
-
-
 			</ul>
-
-
 		</div>
 	</nav>
 
@@ -254,12 +272,12 @@
 
 			</main>
 
-			<jsp:include page="../../includes/footer.jsp"/>
+			<jsp:include page="../includes/footer.jsp"/>
 		</div>
 	</div>
 
 	<script src="js/app.js"></script>
-
+	<script type="text/javascript" src="<%=request.getContextPath()%>/onu_mujeres/static/js/app.js"></script>
 	<script>
 		document.addEventListener("DOMContentLoaded", function() {
 			var date = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000);

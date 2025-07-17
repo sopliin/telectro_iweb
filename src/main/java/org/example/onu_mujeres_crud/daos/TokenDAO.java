@@ -10,6 +10,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 
 public class TokenDAO extends BaseDAO {
@@ -19,14 +21,18 @@ public class TokenDAO extends BaseDAO {
         String token = RandomTokenGenerator.generator();
 
         String idUsuario = String.valueOf(usuario.getUsuarioId());
+        LocalDateTime expiration = LocalDateTime.now().plusHours(24);//24 horas de validez
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String expirationDate = expiration.format(formatter);
 
-        String sql = "INSERT INTO `onu_mujeres`.`token_generado` (`usuario_id`, `token`) VALUES (?, ?);";
+        String sql = "INSERT INTO `onu_mujeres`.`token_generado` (`usuario_id`, `token`,`fecha_expiracion`) VALUES (?, ?,?);";
 
         try(Connection conn = getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
 
             pstmt.setString(1, idUsuario);
             pstmt.setString(2, token);
+            pstmt.setString(3, expirationDate);
             pstmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -128,7 +134,7 @@ public class TokenDAO extends BaseDAO {
 
         String token = null;
 
-        String sql = "SELECT token FROM onu_mujeres.token_generado WHERE token = ?;";
+        String sql = "SELECT token FROM onu_mujeres.token_generado WHERE token = ? AND fecha_expiracion > NOW();";
 
         try(Connection conn = getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
@@ -203,5 +209,27 @@ public class TokenDAO extends BaseDAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+    public String getEmailByToken(String token) {
+        String email = null;
+        String sql = "SELECT u.correo FROM token_generado tg " +
+                "JOIN usuarios u ON tg.usuario_id = u.usuario_id " +
+                "WHERE tg.token = ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, token);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    email = rs.getString("correo");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al obtener email por token", e);
+        }
+
+        return email;
     }
 }

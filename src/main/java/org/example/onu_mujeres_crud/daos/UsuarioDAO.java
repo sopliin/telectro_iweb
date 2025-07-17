@@ -440,11 +440,13 @@ public class UsuarioDAO extends BaseDAO{
     }
 
     public void marcarCorreoComoVerificado(int usuarioId) {
-        String sql = "UPDATE usuarios SET correo_verificado = 1 WHERE usuario_id = ?";
-
+        String sql = "UPDATE usuarios SET correo_verificado = 1,codigo_unico_encuestador=? WHERE usuario_id = ?";
+        int anoActual = java.time.Year.now().getValue();
+        String codigo="ENC-"+anoActual+"-"+usuarioId;
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, usuarioId);
+            pstmt.setString(1, codigo);
+            pstmt.setInt(2, usuarioId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

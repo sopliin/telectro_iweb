@@ -18,6 +18,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Iniciar Sesión | ONU Mujeres</title>
 
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -29,19 +32,39 @@
 
     <style>
         body {
-            background-color: #f8f9fa;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+                       url('https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?auto=format&fit=crop&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: 'Poppins', sans-serif;
         }
         .login-card {
             border: none;
-            border-radius: 10px;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.95);
         }
         .form-control-lg {
             padding: 1rem 1.5rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        .form-control-lg:focus {
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.2);
+            border-color: #0d6efd;
         }
         .login-card a {
             font-size: 1rem;
             text-decoration: none;
+            color: #0d6efd;
+            transition: color 0.3s ease;
+        }
+        .login-card a:hover {
+            color: #0a58ca;
         }
         .login-card small a {
             font-size: 0.9rem;
@@ -55,12 +78,76 @@
         }
         .password-toggle {
             cursor: pointer;
+            border-radius: 0 10px 10px 0;
+            border: 1px solid #e0e0e0;
+            border-left: none;
         }
         .toast-container {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 1100;
+        }
+        .h2 {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .btn-primary {
+            padding: 0.8rem 2rem;
+            font-weight: 500;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            background-color: #0066cc;
+            border-color: #0066cc;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 102, 204, 0.3);
+            background-color: #0052a3;
+            border-color: #0052a3;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #444;
+            margin-bottom: 0.5rem;
+        }
+        img[alt="Logo"] {
+            filter: brightness(0) invert(1);
+            height: auto; /* Permite que la altura se ajuste */
+            max-height: 80px; /* Altura máxima */
+            width: auto; /* Mantiene la relación de aspecto */
+            max-width: 100%; /* Asegura que no desborde su contenedor */
+            margin-bottom: 1.5rem;
+        }
+        .card-body {
+            padding: 2.5rem !important;
+        }
+        /* --- Media Queries para Responsividad --- */
+
+        /* Ajustes para pantallas pequeñas (hasta 767.98px - tablets y teléfonos) */
+        @media (max-width: 767.98px) {
+            .card-body {
+                padding: 1.5rem !important; /* Reduce el padding en pantallas más pequeñas */
+            }
+            .h2 {
+                font-size: 1.8rem; /* Tamaño de fuente ligeramente más pequeño para el título */
+            }
+        }
+
+        /* Ajustes para pantallas extra pequeñas (hasta 575.98px - teléfonos) */
+        @media (max-width: 575.98px) {
+            .form-control-lg {
+                padding: 0.8rem 1.2rem; /* Reduce el padding de los inputs en pantallas muy pequeñas */
+            }
+            .toast-container {
+                top: 10px; /* Más cerca del borde superior */
+                left: 50%;
+                transform: translateX(-50%); /* Centrado horizontalmente */
+                right: auto; /* Elimina la propiedad right */
+                width: 90%; /* Hace que el toast sea más ancho en pantallas pequeñas */
+            }
         }
     </style>
 </head>

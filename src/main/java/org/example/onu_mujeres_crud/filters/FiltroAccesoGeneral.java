@@ -21,12 +21,15 @@ public class FiltroAccesoGeneral implements Filter {
         System.out.println("enlaces "+path);
 
         // Headers anti-caché
-        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, private");
-        response.setHeader("Pragma", "no-cache");
-        response.setDateHeader("Expires", -1);
+        if (path.startsWith("/logout") || path.startsWith("/cambiarContrasena")) {
+            System.out.println( "jajaja");
+            response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, private");
+            response.setHeader("Pragma", "no-cache");
+            response.setDateHeader("Expires", -1);
+        }
 // Excluir TODOS los recursos estáticos
         // Excluir recursos estáticos y páginas públicas
-        if (path.startsWith("/fotos/") || path.equals("/login") || path.equals("/")||path.startsWith("/onu_mujeres/static/css")||path.startsWith("/onu_mujeres/static/js")||path.startsWith("/onu_mujeres/static/fonts")||path.startsWith("/onu_mujeres/static/img")
+        if (path.startsWith("/fotos/") || path.equals("/login") || path.equals("/")||path.startsWith("/onu_mujeres/stati c/css")||path.startsWith("/onu_mujeres/static/js")||path.startsWith("/onu_mujeres/static/fonts")||path.startsWith("/onu_mujeres/static/img")
         ) {
             System.out.println("ingreso foto1");
             if(path.startsWith("/fotos/")){
@@ -56,12 +59,15 @@ public class FiltroAccesoGeneral implements Filter {
 
         if (path.startsWith("/EncuestadorServlet") && rolId != 1) {
             response.sendRedirect(getRedirectUrlForRole(rolId, request.getContextPath()));
+            System.out.println("a");
             return;
         } else if (path.startsWith("/CoordinadorServlet") && rolId != 2) {
             response.sendRedirect(getRedirectUrlForRole(rolId, request.getContextPath()));
+            System.out.println("b");
             return;
         } else if (path.startsWith("/AdminServlet") && rolId != 3) {
             response.sendRedirect(getRedirectUrlForRole(rolId, request.getContextPath()));
+            System.out.println("c");
             return;
         }
 
