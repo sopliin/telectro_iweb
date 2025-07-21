@@ -11,15 +11,15 @@
 	<meta name="description" content="Responsive Admin &amp; Dashboard Template based on Bootstrap 5">
 	<meta name="author" content="AdminKit">
 	<meta name="keywords" content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
-
 	<link rel="preconnect" href="https://fonts.gstatic.com">
 	<link rel="shortcut icon" href="<%=request.getContextPath()%>/img/icons/icon-48x48.png" />
-
 	<link rel="canonical" href="https://demo-basic.adminkit.io/" />
-
 	<link href="<%=request.getContextPath()%>/onu_mujeres/static/css/app.css" type="text/css" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+	<link href="${pageContext.request.contextPath}/CSS/sidebar-navbar-avatar.css" rel="stylesheet">
+
 	<title>Perfil de Usuario - ONU Mujeres</title>
+
 	<style>
 		/* Sidebar mejorado */
 		.sidebar {
@@ -126,7 +126,7 @@
 			gap: 28px;
 			margin-bottom: 36px;
 			padding: 32px 24px 24px 24px;
-			background: rgba(34,46,60,0.95) !important;
+			background: linear-gradient(7deg, #16244a, #191919) !important;
 			color: rgba(255, 255, 255, 0.8) !important;
 			border-radius: 1.2rem 1.2rem 0 0;
 		}
@@ -434,9 +434,8 @@
 		}
 		/* Ajustar grosor y tamaño de letra en los datos */
 		.table-bordered td {
-			font-weight: 600 !important; /* Más grueso */
-			color: #222e3c !important; /* Color más oscuro */
-			font-size: 0.95em !important; /* Un poco más grande */
+			font-weight: 500; /* Más grueso */
+			font-size: 0.93em; /* Un poco más grande */
 		}
 
 		/* Mejorar visibilidad de los botones */

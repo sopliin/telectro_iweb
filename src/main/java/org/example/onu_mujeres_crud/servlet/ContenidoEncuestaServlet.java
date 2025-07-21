@@ -117,65 +117,33 @@ public class ContenidoEncuestaServlet extends HttpServlet {
         String action = request.getParameter("action");
         ContenidoEncuestaDAO contenidoEncuestaDAO = new ContenidoEncuestaDAO();
 
-        String asignacionIdParam = request.getParameter("asignacionId");
-        int asignacionId = 0;
-        if (asignacionIdParam != null && !asignacionIdParam.isEmpty()) {
-            try {
-                asignacionId = Integer.parseInt(asignacionIdParam);
-            } catch (NumberFormatException e) {
-                request.setAttribute("error", "ID de asignación inválido al guardar.");
-                request.getRequestDispatcher("encuestador/mostrarEncuesta.jsp").forward(request, response);
-                return;
-            }
-        } else {
-            request.setAttribute("error", "ID de asignación no presente al guardar.");
-            request.getRequestDispatcher("encuestador/mostrarEncuesta.jsp").forward(request, response);
-            return;
-        }
-        System.out.println(asignacionId);
+        // 1. Obtener parámetros básicos
+        int asignacionId = obtenerAsignacionId(request);
         String dniEncuestado = request.getParameter("dniEncuestado");
         String fechaInicio = request.getParameter("fechaInicio");
 
-        // Validación STRICTA solo para "guardarCompleta"
-        if ("guardarCompleta".equals(action)) {
-            if (dniEncuestado == null || dniEncuestado.trim().isEmpty() || !dniEncuestado.matches("\\d{8}")) {
-                request.setAttribute("error", "Para enviar la encuesta completa, el DNI debe tener 8 dígitos.");
-                recargarFormulario(request, response, asignacionId); // Método auxiliar para recargar datos
-                return;
-            }
-        }
-// Para "guardarBorrador", aceptar DNI vacío o incompleto (pero no nulo)
-        else if (dniEncuestado == null) {
-            dniEncuestado = ""; // Asignar cadena vacía si es null
-        }
-
-
+        // 2. Procesar respuestas del formulario (esto debe hacerse ANTES de las validaciones)
         List<RespuestaDetalle> detallesRespuesta = new ArrayList<>();
-        Map<Integer, Boolean> preguntasRespondidas = new HashMap<>(); // Para validar si todas las preguntas obligatorias fueron respondidas
+        Map<Integer, Boolean> preguntasRespondidas = new HashMap<>();
         String fechaContestacion = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-        ArrayList<BancoPreguntas> preguntasEnDb = null;
         try {
-            preguntasEnDb = contenidoEncuestaDAO.obtenerPreguntasDeEncuestaAsignada(asignacionId);//tipo encuesta(encuestaid)
+            ArrayList<BancoPreguntas> preguntasEnDb = contenidoEncuestaDAO.obtenerPreguntasDeEncuestaAsignada(asignacionId);
+
+            // Inicializar mapa de preguntas respondidas
             for (BancoPreguntas bp : preguntasEnDb) {
-                preguntasRespondidas.put(bp.getPreguntaId(), false); // Inicializar como no respondidas
+                preguntasRespondidas.put(bp.getPreguntaId(), false);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Error al obtener preguntas de la base de datos para validación.");
-            doGet(request, response); // Volver a cargar el formulario con el error
-            return;
-        }
 
-        Enumeration<String> parameterNames = request.getParameterNames();
-        while (parameterNames.hasMoreElements()) {
-            String paramName = parameterNames.nextElement();
-            if (paramName.startsWith("respuesta_")) { // Para respuestas de texto y numéricas
-                int preguntaId = Integer.parseInt(paramName.substring("respuesta_".length()));
-                String respuestaTexto = request.getParameter(paramName);
+            // Procesar parámetros del request para construir detallesRespuesta
+            Enumeration<String> parameterNames = request.getParameterNames();
+            while (parameterNames.hasMoreElements()) {
+                String paramName = parameterNames.nextElement();
 
-                // Asegúrate de que la pregunta existe en el banco de preguntas de esta encuesta
-                if (preguntasEnDb.stream().anyMatch(p -> p.getPreguntaId() == preguntaId)) {
+                if (paramName.startsWith("respuesta_")) {
+                    int preguntaId = Integer.parseInt(paramName.substring("respuesta_".length()));
+                    String respuestaTexto = request.getParameter(paramName);
+
                     if (respuestaTexto != null && !respuestaTexto.trim().isEmpty()) {
                         RespuestaDetalle detalle = new RespuestaDetalle();
                         BancoPreguntas pregunta = new BancoPreguntas();
@@ -184,14 +152,12 @@ public class ContenidoEncuestaServlet extends HttpServlet {
                         detalle.setRespuestaTexto(respuestaTexto.trim());
                         detalle.setFechaContestacion(fechaContestacion);
                         detallesRespuesta.add(detalle);
-                        preguntasRespondidas.put(preguntaId, true); // Marcar como respondida
+                        preguntasRespondidas.put(preguntaId, true);
                     }
-                }
-            } else if (paramName.startsWith("opcion_")) { // Para respuestas de opción única o múltiple
-                int preguntaId = Integer.parseInt(paramName.substring("opcion_".length()));
-                String[] selectedOptions = request.getParameterValues(paramName);
+                } else if (paramName.startsWith("opcion_")) {
+                    int preguntaId = Integer.parseInt(paramName.substring("opcion_".length()));
+                    String[] selectedOptions = request.getParameterValues(paramName);
 
-                if (preguntasEnDb.stream().anyMatch(p -> p.getPreguntaId() == preguntaId)) {
                     if (selectedOptions != null && selectedOptions.length > 0) {
                         for (String opcionIdStr : selectedOptions) {
                             RespuestaDetalle detalle = new RespuestaDetalle();
@@ -205,105 +171,70 @@ public class ContenidoEncuestaServlet extends HttpServlet {
                             detalle.setFechaContestacion(fechaContestacion);
                             detallesRespuesta.add(detalle);
                         }
-                        preguntasRespondidas.put(preguntaId, true); // Marcar como respondida
+                        preguntasRespondidas.put(preguntaId, true);
                     }
                 }
             }
-        }
 
-        boolean allQuestionsAnswered = true;
-        for (BancoPreguntas pregunta : preguntasEnDb) {
-            // Asumiendo que todas las preguntas son obligatorias para "guardarCompleta"
-            if (!preguntasRespondidas.getOrDefault(pregunta.getPreguntaId(), false)) {
-                allQuestionsAnswered = false;
-                break;
-            }
-        }
-
-        Respuesta respuesta = new Respuesta();
-        EncuestaAsignada asignacion = new EncuestaAsignada();
-        asignacion.setAsignacionId(asignacionId);
-        respuesta.setAsignacion(asignacion);
-        respuesta.setDniEncuestado(dniEncuestado);
-        respuesta.setFechaInicio(fechaInicio); // Esto debería ser la fecha de inicio real de la encuesta o la primera vez que se guarda
-        respuesta.setFechaEnvio(fechaContestacion); // Esta es la fecha de la última modificación/envío
-
-        try {
+            // 3. Validaciones (ahora tenemos acceso a detallesRespuesta)
             if ("guardarCompleta".equals(action)) {
-                if (allQuestionsAnswered) {
-                    contenidoEncuestaDAO.guardarEncuestaCompleta(respuesta, detallesRespuesta);
-                    response.sendRedirect(request.getContextPath() + "/ContenidoEncuestaServlet?success=encuestaCompletada&asignacionId=" + asignacionId);
-                } else {
-                    request.setAttribute("error", "Para guardar la encuesta completa, debe responder todas las preguntas.");
-                    // Recargar el formulario con los datos y errores
-                    request.setAttribute("preguntasEncuesta", preguntasEnDb);
-                    request.setAttribute("asignacionId", asignacionId);
-
-                    Map<Integer, List<String>> respuestasUsuarioOpcionesRecargar = new HashMap<>();
-                    Map<Integer, String> respuestasUsuarioTextoNumericoRecargar = new HashMap<>();
-                    for (RespuestaDetalle rd : detallesRespuesta) {
-                        if (rd.getOpcion() != null) {
-                            respuestasUsuarioOpcionesRecargar.computeIfAbsent(rd.getPregunta().getPreguntaId(), k -> new ArrayList<>())
-                                    .add(String.valueOf(rd.getOpcion().getOpcionId()));
-                        } else if (rd.getRespuestaTexto() != null) {
-                            respuestasUsuarioTextoNumericoRecargar.put(rd.getPregunta().getPreguntaId(), rd.getRespuestaTexto());
-                        }
-                    }
-                    request.setAttribute("respuestasUsuarioOpciones", respuestasUsuarioOpcionesRecargar);
-                    request.setAttribute("respuestasUsuarioTextoNumerico", respuestasUsuarioTextoNumericoRecargar);
-                    request.setAttribute("dniEncuestadoBorrador", dniEncuestado);
-                    request.setAttribute("fechaInicioBorrador", fechaInicio);
-
-                    for (BancoPreguntas pregunta : preguntasEnDb) {
-                        if (pregunta.getTipo().equals("opcion_unica") || pregunta.getTipo().equals("opcion_multiple")) {
-                            ArrayList<PreguntaOpcion> opciones = contenidoEncuestaDAO.obtenerOpcionesDePregunta(pregunta.getPreguntaId());
-                            request.setAttribute("opciones_" + pregunta.getPreguntaId(), opciones);
-                        }
-                    }
-                    request.getRequestDispatcher("/encuestador/mostrarEncuesta.jsp").forward(request, response);
+                // Validación de formato DNI
+                if (dniEncuestado == null || dniEncuestado.trim().isEmpty() || !dniEncuestado.matches("\\d{8}")) {
+                    request.setAttribute("error", "Para enviar la encuesta completa, el DNI debe tener 8 dígitos.");
+                    recargarFormularioConDatos(request, response, asignacionId, dniEncuestado, fechaInicio, detallesRespuesta);
+                    return;
                 }
+
+                // Validación de DNI único
+                boolean dniExisteEnCompletadas = contenidoEncuestaDAO.verificarDniEnAsignacionesCompletadas(dniEncuestado);
+                if (dniExisteEnCompletadas) {
+                    request.setAttribute("error", "El DNI " + dniEncuestado + " ya existe en una encuesta completada.");
+                    recargarFormularioConDatos(request, response, asignacionId, dniEncuestado, fechaInicio, detallesRespuesta);
+                    return;
+                }
+
+                // Validación de preguntas completas
+                boolean allQuestionsAnswered = preguntasEnDb.stream()
+                        .allMatch(p -> preguntasRespondidas.getOrDefault(p.getPreguntaId(), false));
+
+
+            }
+
+
+            // 4. Si pasó todas las validaciones, guardar
+            Respuesta respuesta = new Respuesta();
+            EncuestaAsignada asignacion = new EncuestaAsignada();
+            asignacion.setAsignacionId(asignacionId);
+            respuesta.setAsignacion(asignacion);
+            respuesta.setDniEncuestado(dniEncuestado);
+            respuesta.setFechaInicio(fechaInicio);
+            respuesta.setFechaEnvio(fechaContestacion);
+
+            if ("guardarCompleta".equals(action)) {
+                contenidoEncuestaDAO.guardarEncuestaCompleta(respuesta, detallesRespuesta);
+                response.sendRedirect(request.getContextPath() + "/EncuestadorServlet?success=encuestaCompletada&asignacionId=" + asignacionId);
             } else if ("guardarBorrador".equals(action)) {
                 contenidoEncuestaDAO.guardarRespuesta(respuesta, detallesRespuesta);
                 response.sendRedirect(request.getContextPath() + "/ContenidoEncuestaServlet?success=borradorGuardado&asignacionId=" + asignacionId);
-            } else {
-                request.setAttribute("error", "Acción no válida.");
-                request.getRequestDispatcher("/encuestador/mostrarEncuesta.jsp").forward(request, response);
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
-            request.setAttribute("error", "Error al guardar las respuestas: " + e.getMessage());
-            // Recargar el formulario con los datos y errores en caso de excepción SQL
-            request.setAttribute("preguntasEncuesta", preguntasEnDb);
-            request.setAttribute("asignacionId", asignacionId);
-
-            Map<Integer, List<String>> respuestasUsuarioOpcionesRecargar = new HashMap<>();
-            Map<Integer, String> respuestasUsuarioTextoNumericoRecargar = new HashMap<>();
-            for (RespuestaDetalle rd : detallesRespuesta) {
-                if (rd.getOpcion() != null) {
-                    respuestasUsuarioOpcionesRecargar.computeIfAbsent(rd.getPregunta().getPreguntaId(), k -> new ArrayList<>())
-                            .add(String.valueOf(rd.getOpcion().getOpcionId()));
-                } else if (rd.getRespuestaTexto() != null) {
-                    respuestasUsuarioTextoNumericoRecargar.put(rd.getPregunta().getPreguntaId(), rd.getRespuestaTexto());
-                }
-            }
-            request.setAttribute("respuestasUsuarioOpciones", respuestasUsuarioOpcionesRecargar);
-            request.setAttribute("respuestasUsuarioTextoNumerico", respuestasUsuarioTextoNumericoRecargar);
-            request.setAttribute("dniEncuestadoBorrador", dniEncuestado);
-            request.setAttribute("fechaInicioBorrador", fechaInicio);
-
-            try {
-                for (BancoPreguntas pregunta : preguntasEnDb) {
-                    if (pregunta.getTipo().equals("opcion_unica") || pregunta.getTipo().equals("opcion_multiple")) {
-                        ArrayList<PreguntaOpcion> opciones = contenidoEncuestaDAO.obtenerOpcionesDePregunta(pregunta.getPreguntaId());
-                        request.setAttribute("opciones_" + pregunta.getPreguntaId(), opciones);
-                    }
-                }
-            } catch (SQLException ex) {
-                System.err.println("Error al recargar opciones para rellenar formulario en caso de error: " + ex.getMessage());
-            }
-
-            request.getRequestDispatcher("/encuestador/mostrarEncuesta.jsp").forward(request, response);
+            request.setAttribute("error", "Error al procesar la encuesta: " + e.getMessage());
+            recargarFormularioConDatos(request, response, asignacionId, dniEncuestado, fechaInicio, detallesRespuesta);
         }
+    }
+
+    private int obtenerAsignacionId(HttpServletRequest request) {
+        String asignacionIdParam = request.getParameter("asignacionId");
+        if (asignacionIdParam != null && !asignacionIdParam.isEmpty()) {
+            try {
+                return Integer.parseInt(asignacionIdParam);
+            } catch (NumberFormatException e) {
+                throw new RuntimeException("ID de asignación inválido", e);
+            }
+        }
+        throw new RuntimeException("ID de asignación no presente");
     }
     private void recargarFormulario(HttpServletRequest request, HttpServletResponse response, int asignacionId)
             throws ServletException, IOException {
@@ -323,6 +254,55 @@ public class ContenidoEncuestaServlet extends HttpServlet {
             e.printStackTrace();
         }
         request.getRequestDispatcher("/encuestador/mostrarEncuesta.jsp").forward(request, response);
+    }
+
+    private void recargarFormularioConDatos(HttpServletRequest request, HttpServletResponse response,
+                                            int asignacionId, String dniEncuestado, String fechaInicio,
+                                            List<RespuestaDetalle> detallesRespuesta)
+            throws ServletException, IOException {
+        ContenidoEncuestaDAO contenidoEncuestaDAO = new ContenidoEncuestaDAO();
+
+        try {
+            // 1. Obtener preguntas de la encuesta
+            ArrayList<BancoPreguntas> preguntas = contenidoEncuestaDAO.obtenerPreguntasDeEncuestaAsignada(asignacionId);
+
+            // 2. Preparar mapas para respuestas ya ingresadas
+            Map<Integer, List<String>> respuestasUsuarioOpciones = new HashMap<>();
+            Map<Integer, String> respuestasUsuarioTextoNumerico = new HashMap<>();
+
+            for (RespuestaDetalle rd : detallesRespuesta) {
+                if (rd.getOpcion() != null) {
+                    respuestasUsuarioOpciones.computeIfAbsent(rd.getPregunta().getPreguntaId(), k -> new ArrayList<>())
+                            .add(String.valueOf(rd.getOpcion().getOpcionId()));
+                } else if (rd.getRespuestaTexto() != null) {
+                    respuestasUsuarioTextoNumerico.put(rd.getPregunta().getPreguntaId(), rd.getRespuestaTexto());
+                }
+            }
+
+            // 3. Obtener opciones para preguntas de selección
+            for (BancoPreguntas pregunta : preguntas) {
+                if (pregunta.getTipo().equals("opcion_unica") || pregunta.getTipo().equals("opcion_multiple")) {
+                    ArrayList<PreguntaOpcion> opciones = contenidoEncuestaDAO.obtenerOpcionesDePregunta(pregunta.getPreguntaId());
+                    request.setAttribute("opciones_" + pregunta.getPreguntaId(), opciones);
+                }
+            }
+
+            // 4. Establecer atributos para la vista
+            request.setAttribute("preguntasEncuesta", preguntas);
+            request.setAttribute("asignacionId", asignacionId);
+            request.setAttribute("respuestasUsuarioOpciones", respuestasUsuarioOpciones);
+            request.setAttribute("respuestasUsuarioTextoNumerico", respuestasUsuarioTextoNumerico);
+            request.setAttribute("dniEncuestadoBorrador", dniEncuestado);
+            request.setAttribute("fechaInicioBorrador", fechaInicio);
+
+            // 5. Redirigir manteniendo los datos
+            request.getRequestDispatcher("/encuestador/mostrarEncuesta.jsp").forward(request, response);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Error al recargar el formulario: " + e.getMessage());
+            request.getRequestDispatcher("/encuestador/mostrarEncuesta.jsp").forward(request, response);
+        }
     }
 
 }

@@ -313,7 +313,44 @@ public class EncuestaDAO extends BaseDAO {
                     encuesta.setEncuestaId(rs.getInt("encuesta_id"));
                     encuesta.setNombre(rs.getString("nombre"));
                     encuesta.setDescripcion(rs.getString("descripcion"));
-                    encuesta.setEstado(rs.getString("estado"));  // <-- ESTA LÍNEA ES CLAVE
+                    encuesta.setEstado(rs.getString("estado"));
+                    encuestas.add(encuesta);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return encuestas;
+    }
+
+    // para asignar encuestas a los encuestadores desde la vista de "encuestadores"
+    public ArrayList<Encuesta> obtenerEncuestasPorCarpetaAsignar(String carpeta) {
+        ArrayList<Encuesta> encuestas = new ArrayList<>();
+        String sql;
+
+        if (carpeta == null || carpeta.isEmpty()) {
+            sql = "SELECT encuesta_id, nombre, descripcion, estado, carpeta FROM encuestas";
+        } else {
+            sql = "SELECT encuesta_id, nombre, descripcion, estado FROM encuestas WHERE carpeta = ?";
+        }
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            if (carpeta != null && !carpeta.isEmpty()) {
+                pstmt.setString(1, carpeta);
+            }
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Encuesta encuesta = new Encuesta();
+                    encuesta.setEncuestaId(rs.getInt("encuesta_id"));
+                    encuesta.setNombre(rs.getString("nombre"));
+                    encuesta.setDescripcion(rs.getString("descripcion"));
+                    encuesta.setEstado(rs.getString("estado"));
+                    encuesta.setCarpeta(rs.getString("carpeta"));
                     encuestas.add(encuesta);
                 }
             }

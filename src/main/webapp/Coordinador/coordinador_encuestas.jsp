@@ -17,44 +17,12 @@
 	<link rel="canonical" href="https://demo-basic.adminkit.io/" />
 	<link href="<%=request.getContextPath()%>/onu_mujeres/static/css/app.css" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-	<title> Seccion de encuestas - Coordinador</title>
-	<style>
-		/* Sidebar mejorado */
-		.sidebar {
-			background: linear-gradient(195deg, #42424a, #191919) !important; /* Fondo oscuro elegante */
-			color: rgba(255, 255, 255, 0.8) !important;
-		}
-		.sidebar .sidebar-brand {
-			border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-		}
-		.sidebar-link {
-			color: rgba(255, 255, 255, 0.7) !important;
-			transition: all 0.2s ease-in-out;
-		}
-		/* Estilo para el elemento activo de la sidebar - como en la imagen 'Encuestadores de zona' */
-		.sidebar-item.active > .sidebar-link {
-			color: #ffffff !important;
-			background-color: transparent !important; /* Fondo transparente */
-			border-left: 5px solid #007bff; /* Borde izquierdo azul fuerte */
-			padding-left: calc(1.5rem - 5px); /* Ajustar padding para compensar el borde */
-			border-radius: 0; /* Sin bordes redondeados en este lado */
-			box-shadow: none; /* Eliminar sombra para este estilo */
-		}
-		.sidebar-item.active > .sidebar-link:hover {
-			background-color: rgba(255, 255, 255, 0.05) !important; /* Un ligero hover */
-		}
-		.sidebar-link:hover { /* Estilo de hover general */
-			color: #ffffff !important;
-			background-color: rgba(255, 255, 255, 0.1) !important;
-			border-radius: 0.5rem;
-		}
+	<link href="${pageContext.request.contextPath}/CSS/sidebar-navbar-avatar.css" rel="stylesheet">
 
-		.sidebar-header {
-			color: rgba(255, 255, 255, 0.5) !important;
-			font-size: 0.75rem;
-			text-transform: uppercase;
-			letter-spacing: 0.05em;
-		}
+	<title> Seccion de encuestas - Coordinador</title>
+
+	<style>
+
 		/* Estilo adicional para los botones para asegurar uniformidad */
 		.btn-uniform {
 			min-width: 90px; /*  */
@@ -82,63 +50,6 @@
 		.btn-icon-profile i {
 			font-size: 1.25rem; /*  */
 		}
-
-		/* ----- Ajustes para la barra de navegación superior y el bloque de usuario ----- */
-		.navbar {
-			min-height: 56px;
-			background-color: #ffffff !important; /* Navbar blanca */
-			box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-		}
-		.navbar-nav .nav-item {
-			display: flex;
-			align-items: center;
-			height: 100%;
-		}
-		.navbar-align .nav-item .dropdown-toggle {
-			display: flex;
-			align-items: center;
-			height: 100%;
-			padding-top: 0;
-			padding-bottom: 0;
-			padding-left: 1rem;
-			padding-right: 1rem;
-		}
-		/* Estilo para la imagen de perfil del usuario */
-		.user-avatar {
-			width: 36px;
-			height: 36px;
-			border-radius: 50%;
-			object-fit: cover;
-			margin-right: 0.5rem;
-			flex-shrink: 0;
-			border: 2px solid #e9ecef; /* Pequeño borde para la foto de perfil */
-		}
-		/* Contenedor del nombre y rol */
-		.navbar-align .nav-item .dropdown-toggle .user-info-container {
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
-			line-height: 1.2;
-			white-space: nowrap;
-		}
-		.navbar-align .nav-item .dropdown-toggle .user-info-container .text-dark {
-			line-height: 1.2;
-			font-weight: 600; /* Negrita para el nombre */
-			color: #344767 !important;
-		}
-		.navbar-align .nav-item .dropdown-toggle .user-info-container .text-muted {
-			font-size: 0.75em;
-			line-height: 1.2;
-			text-transform: uppercase; /* Rol en mayúsculas */
-			color: #6c757d !important;
-		}
-		/* Espaciado del botón desplegable (flecha) a la derecha del nombre/rol */
-		.navbar-align .nav-item .dropdown-toggle::after {
-			margin-left: 0.5rem;
-		}
-
-		/* FIN DE LOS AJUSTES DE ALINEACIÓN DE USUARIO */
-
 
 		.filter-section .form-label {
 			margin-bottom: 0.5rem; /*  */
@@ -343,23 +254,23 @@
 		}
 
 		.table-hover thead th:nth-child(2) { /* Nombre */
-			min-width: 100px;
+			min-width: 2rem;
 		}
 
 		.table-hover thead th:nth-child(3) { /* Descripción */
-			min-width: 250px;
+			min-width: 2rem;
 		}
 
 		.table-hover thead th:nth-child(4) { /* Estado */
-			min-width: 100px;
+			min-width: 1rem;
 		}
 
 		.table-hover thead th:nth-child(5) { /* Encuestador (Botón Asignar) */
-			min-width: 120px;
+			min-width: 1rem;
 		}
 
 		.table-hover thead th:nth-child(6) { /* Acciones (Botones Activar/Desactivar) */
-			min-width: 120px;
+			min-width: 1rem;
 		}
 
 		/* Ocultar barra de desplazamiento horizontal si no es necesaria */
@@ -386,16 +297,6 @@
 			flex-direction: column; /*  */
 			justify-content: center; /*  */
 		}
-
-		.nombre {
-			font-weight: bold; /*  */
-		}
-
-		.rol {
-			font-size: 0.9em; /*  */
-			color: #888; /*  */
-		}
-
 
 		 .main {
 			 position: relative;
@@ -605,7 +506,6 @@
 											</form>
 										</div>
 									</td>
-										<%-- -------- --%>
 								</tr>
 							</c:forEach>
 							</tbody>

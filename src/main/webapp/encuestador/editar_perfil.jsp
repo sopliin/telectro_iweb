@@ -10,14 +10,15 @@
     <meta name="description" content="ONU Mujeres - Editar Perfil">
     <meta name="author" content="ONU Mujeres">
     <meta name="keywords" content="onu, mujeres, encuestas, administración">
-
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel="shortcut icon" href="img/icons/icon-48x48.png" />
-
-    <title>Editar Perfil - ONU Mujeres</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/onu_mujeres/static/css/app.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/CSS/sidebar-navbar-avatar.css" rel="stylesheet">
+
+    <title>Editar Perfil - ONU Mujeres</title>
+
     <style>
 
         /* Sidebar mejorado */

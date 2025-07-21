@@ -1,4 +1,4 @@
-<%@ page import="org.example.onu_mujeres_crud.beans.Usuario" %>
+%@ page import="org.example.onu_mujeres_crud.beans.Usuario" %>
 <%@ page import="org.example.onu_mujeres_crud.beans.Encuesta" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%

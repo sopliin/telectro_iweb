@@ -282,7 +282,7 @@
 <body class="d-flex flex-column min-vh-100">
 <main class="container py-3 flex-grow-1 d-flex align-items-center">
     <div class="w-100">
-        <div class="text-center mb-4">
+        <div class="text-center mt-5 mb-4">
             <img src="<%=request.getContextPath()%>/onu_mujeres/static/img/logo.png" alt="Logo" class="mb-3">
             <h1 class="main-header-text">Registro de Encuestador</h1>
         </div>

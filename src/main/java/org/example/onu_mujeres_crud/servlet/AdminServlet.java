@@ -3,11 +3,21 @@ package org.example.onu_mujeres_crud.servlet;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.SpreadsheetVersion;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.AreaReference;
+import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFTable;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTPivotCache;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTPivotCaches;
+import org.apache.xmlbeans.XmlBoolean;
+
+import org.apache.poi.xssf.usermodel.XSSFPivotTable;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.*;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTPivotTableDefinition;
+
 import org.example.onu_mujeres_crud.EmailSender;
 import org.example.onu_mujeres_crud.beans.Distrito;
 import org.example.onu_mujeres_crud.beans.Rol;
@@ -15,16 +25,17 @@ import org.example.onu_mujeres_crud.beans.Usuario;
 import org.example.onu_mujeres_crud.beans.Zona;
 import org.example.onu_mujeres_crud.daos.*;
 import org.example.onu_mujeres_crud.dtos.DashboardDTO;
+import org.example.onu_mujeres_crud.dtos.EstadisticasEncuestaDTO;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLEncoder;
+import java.io.*;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 //Hola :D
@@ -35,7 +46,18 @@ import java.util.Map;
         maxRequestSize = 1024 * 1024 * 10 // 10MB
 )
 public class AdminServlet extends HttpServlet {
-
+    final String[] infoFormulas = {
+            "COUNTA(A:A)-1",
+            "AVERAGE(H:H)",
+            "COUNTIF(I:I,\"Sí\")",
+            "SUM(J:J)",
+            "COUNTIF(K:K,\"Sí\")",
+            "COUNTIF(M:M,\"Sí\")",
+            "SUM(N:N)",
+            "COUNTIF(O:O,\"Sí\")",
+            "SUM(P:P)",
+            "COUNTIF(Q:Q,\"Sí\")"
+    };
     private static final int DEFAULT_REGISTROS_POR_PAGINA = 7;
 
     @Override
@@ -403,57 +425,181 @@ public class AdminServlet extends HttpServlet {
             nombreReporte = "coordinadores";
         } else if (tipoReporte.equals("encuestadores")) {
             nombreReporte = "encuestadores";
+        } else if (tipoReporte.equals("respuestas")) {
+            nombreReporte = "respuestas";
         } else {
             nombreReporte = tipoReporte;
         }
         try {
             UsuarioAdminDao adminDao = new UsuarioAdminDao();
-            ArrayList<Usuario> usuarios = adminDao.obtenerUsuariosParaReporte(tipoReporte);
             // Configurar respuesta
             response.setContentType("application/vnd.ms-excel");
-            response.setHeader("Content-Disposition", "attachment; filename=reporte_" + nombreReporte +".xlsx");
-            // Crear libro Excel
-            Workbook workbook = new XSSFWorkbook();
-            Sheet sheet = workbook.createSheet("Usuarios");
-            // Crear fila de encabezados
-            Row headerRow = sheet.createRow(0);
-            String[] headers = {"ID", "Nombre", "Apellidos", "DNI", "Correo", "Rol", "Zona", "Distrito","Código único de Encuestador", "Estado", "Fecha Registro"};
-            for (int i = 0; i < headers.length; i++) {
-                Cell cell = headerRow.createCell(i);
-                cell.setCellValue(headers[i]);
+
+            //Evaluar si es Para Gestion de Usuarios o Analisis de datos
+            if (tipoReporte.equals("todos") || tipoReporte.equals("activos") || tipoReporte.equals("inactivos") || tipoReporte.equals("coordinadores") || tipoReporte.equals("encuestadores")) {
+                //Gestion de Usuarios
+                ArrayList<Usuario> usuarios = adminDao.obtenerUsuariosParaReporte(tipoReporte);
+                response.setHeader("Content-Disposition", "attachment; filename=reporte_" + nombreReporte +".xlsx");
+                // Crear libro Excel
+                Workbook workbook = new XSSFWorkbook();
+                Sheet sheet = workbook.createSheet("Usuarios");
+                // Crear fila de encabezados
+                Row headerRow = sheet.createRow(0);
+                String[] headers = {"ID", "Nombre", "Apellidos", "DNI", "Correo", "Rol", "Zona", "Distrito","Código único de Encuestador", "Estado", "Fecha Registro"};
+                for (int i = 0; i < headers.length; i++) {
+                    Cell cell = headerRow.createCell(i);
+                    cell.setCellValue(headers[i]);
+                }
+                // Llenar datos
+                int rowNum = 1;
+                for (Usuario usuario : usuarios) {
+                    Row row = sheet.createRow(rowNum++);
+                    row.createCell(0).setCellValue(rowNum-1);
+                    row.createCell(1).setCellValue(usuario.getNombre());
+                    row.createCell(2).setCellValue(usuario.getApellidoPaterno() + " " +
+                            (usuario.getApellidoMaterno() != null ? usuario.getApellidoMaterno() : ""));
+                    row.createCell(3).setCellValue(usuario.getDni());
+                    row.createCell(4).setCellValue(usuario.getCorreo());
+                    row.createCell(5).setCellValue(usuario.getRol().getNombre());
+                    row.createCell(6).setCellValue(usuario.getZona() != null ? usuario.getZona().getNombre() : "N/A");
+                    row.createCell(7).setCellValue(usuario.getDistrito() != null ? usuario.getDistrito().getNombre() : "N/A");
+                    String codigoUnico = usuario.getCodigoUnicoEncuestador();
+                    row.createCell(8).setCellValue(
+                            codigoUnico != null && !codigoUnico.isEmpty() ? codigoUnico : "No aplica"
+                    );
+                    row.createCell(9).setCellValue(usuario.getEstado());
+                    String fechaOriginal = usuario.getFechaRegistro();
+                    DateTimeFormatter formatoEntrada = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    LocalDateTime fecha = LocalDateTime.parse(fechaOriginal, formatoEntrada);
+                    DateTimeFormatter formatoSalida = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+                    String fechaFormateada = fecha.format(formatoSalida);
+                    row.createCell(10).setCellValue(fechaFormateada);
+                }
+                // Autoajustar columnas
+                for (int i = 0; i < headers.length; i++) {
+                    sheet.autoSizeColumn(i);
+                }
+                // Escribir archivo
+                workbook.write(response.getOutputStream());
+                workbook.close();
+            } else if (tipoReporte.equals("respuestas")) {
+                //Analisis de datos por pregunta.
+                String plantillaPath = request.getServletContext().getRealPath("/admin/plantilla.xlsx");
+                ArrayList<EstadisticasEncuestaDTO> datos = adminDao.obtenerEstadisticasEncuesta();
+                response.setHeader("Content-Disposition", "attachment; filename=reporte_estadisticas.xlsx");
+                response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+                //Cargar la plantilla
+                try (FileInputStream fis = new FileInputStream(plantillaPath);
+                     XSSFWorkbook wb = new XSSFWorkbook(fis);
+                     ServletOutputStream out = response.getOutputStream()) {
+
+                    CreationHelper helper = wb.getCreationHelper();
+                    CellStyle dateStyle = wb.createCellStyle();
+                    dateStyle.setDataFormat(helper.createDataFormat().getFormat("dd/MM/yyyy HH:mm:ss"));
+                    CellStyle numStyle = wb.createCellStyle();
+                    numStyle.setDataFormat(helper.createDataFormat().getFormat("0"));
+
+                    // Recupera la hoja “Respuestas” tal cual viene en tu plantilla
+                    XSSFSheet sheet = wb.getSheet("Respuestas");
+                    if (sheet == null) {
+                        throw new IllegalStateException("La plantilla no contiene hoja 'Respuestas'");
+                    }
+
+
+                    // Llenar datos
+                    int startRow = 1;
+                    SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                    for (EstadisticasEncuestaDTO d : datos) {
+                        Row row = sheet.createRow(startRow++);
+                        row.createCell(0).setCellValue(startRow - 1);
+                        // Columna B: FechaEncuesta
+                        Cell cFecha = row.createCell(1);
+                        if (d.getFechaEncuesta() != null) {
+                            try {
+                                Date fecha = df.parse(d.getFechaEncuesta());
+                                cFecha.setCellValue(fecha);
+                                cFecha.setCellStyle(dateStyle);
+                            } catch (ParseException ex) {
+                                cFecha.setCellValue(d.getFechaEncuesta());
+                            }
+                        }
+                        row.createCell(2).setCellValue(d.getCoordinador());
+                        row.createCell(3).setCellValue(d.getDistrito());
+                        row.createCell(4).setCellValue(d.getZona());
+                        row.createCell(5).setCellValue(d.getEncuestador());
+                        row.createCell(6).setCellValue(d.getDniEncuestado());
+                        row.createCell(7).setCellValue(d.getRespuestaPreg8() == null ? 0 : Integer.parseInt(d.getRespuestaPreg8()));
+                        row.createCell(8).setCellValue(d.getRespuestaPreg9() == null ? "No respondió" : d.getRespuestaPreg9());
+                        row.createCell(9).setCellValue(d.getRespuestaPreg10() == null ? 0 : Integer.parseInt(d.getRespuestaPreg10()));
+                        row.createCell(10).setCellValue(d.getRespuestaPreg11() == null ? "No respondió" : d.getRespuestaPreg11());
+                        row.createCell(11).setCellValue(d.getRespuestaPreg12() == null ? "No respondió" : d.getRespuestaPreg12());
+                        row.createCell(12).setCellValue(d.getRespuestaPreg13() == null ? "No respondió" : d.getRespuestaPreg13());
+                        row.createCell(13).setCellValue(d.getRespuestaPreg14() == null ? 0 : Integer.parseInt(d.getRespuestaPreg14()));
+                        row.createCell(14).setCellValue(d.getRespuestaPreg17() == null ? "No respondió" : d.getRespuestaPreg17());
+                        row.createCell(15).setCellValue(d.getRespuestaPreg18() == null ? 0 : Integer.parseInt(d.getRespuestaPreg18()));
+                        row.createCell(16).setCellValue(d.getRespuestaPreg20() == null ? "No respondió" : d.getRespuestaPreg20());
+                    }
+
+                    // … tras haber cargado la plantilla y llenado “Respuestas” …
+                    int endRow = startRow - 1;
+                    List<XSSFTable> tables = sheet.getTables();
+                    if (!tables.isEmpty()) {
+                        XSSFTable table = tables.get(0);
+
+                        CellReference topLeft     = new CellReference(table.getStartRowIndex(), table.getStartColIndex());
+                        CellReference bottomRight = new CellReference(endRow,   table.getEndColIndex());
+
+                        AreaReference newArea = new AreaReference(topLeft, bottomRight, SpreadsheetVersion.EXCEL2007);
+
+                        table.getCTTable().setRef(newArea.formatAsString());
+
+                        if (table.getCTTable().getAutoFilter() != null) {
+                            table.getCTTable().getAutoFilter().setRef(newArea.formatAsString());
+                        }
+                    }
+                    for (int si = 0; si < wb.getNumberOfSheets(); si++) {
+                        Sheet sh = wb.getSheetAt(si);
+                        if (sh.getPhysicalNumberOfRows() == 0) continue;
+                        Row header = sh.getRow(0);
+                        if (header == null) continue;
+                        for (int col = 0; col < header.getLastCellNum(); col++) {
+                            sh.autoSizeColumn(col);
+                        }
+                    }
+                    String[] infoFormulas = {
+                            "COUNTA(Respuestas!A:A)-1",
+                            "AVERAGE(Respuestas!H:H)",
+                            "COUNTIF(Respuestas!I:I,\"Sí\")",
+                            "SUM(Respuestas!J:J)",
+                            "COUNTIF(Respuestas!K:K,\"Sí\")",
+                            "COUNTIF(Respuestas!M:M,\"Sí\")",
+                            "SUM(Respuestas!N:N)",
+                            "COUNTIF(Respuestas!O:O,\"Sí\")",
+                            "SUM(Respuestas!P:P)",
+                            "COUNTIF(Respuestas!Q:Q,\"Sí\")"
+                    };
+                    XSSFSheet leyendaSheet = wb.getSheet("Leyenda");
+                    if (leyendaSheet != null) {
+                        // G column = index 6, filas 4–13 => índices 3..12
+                        for (int i = 0; i < infoFormulas.length; i++) {
+                            int rowIndex = 3 + i;
+                            Row r = leyendaSheet.getRow(rowIndex);
+                            if (r == null) {
+                                r = leyendaSheet.createRow(rowIndex);
+                            }
+                            Cell c = r.getCell(6);
+                            if (c == null) {
+                                c = r.createCell(6);
+                            }
+                            c.setCellFormula(infoFormulas[i]);
+                        }
+                    }
+                    wb.setForceFormulaRecalculation(true);
+                    // Escribir archivo
+                    wb.write(out);
+                }
             }
-            // Llenar datos
-            int rowNum = 1;
-            for (Usuario usuario : usuarios) {
-                Row row = sheet.createRow(rowNum++);
-                row.createCell(0).setCellValue(rowNum-1);
-                row.createCell(1).setCellValue(usuario.getNombre());
-                row.createCell(2).setCellValue(usuario.getApellidoPaterno() + " " +
-                        (usuario.getApellidoMaterno() != null ? usuario.getApellidoMaterno() : ""));
-                row.createCell(3).setCellValue(usuario.getDni());
-                row.createCell(4).setCellValue(usuario.getCorreo());
-                row.createCell(5).setCellValue(usuario.getRol().getNombre());
-                row.createCell(6).setCellValue(usuario.getZona() != null ? usuario.getZona().getNombre() : "N/A");
-                row.createCell(7).setCellValue(usuario.getDistrito() != null ? usuario.getDistrito().getNombre() : "N/A");
-                String codigoUnico = usuario.getCodigoUnicoEncuestador();
-                row.createCell(8).setCellValue(
-                        codigoUnico != null && !codigoUnico.isEmpty() ? codigoUnico : "No aplica"
-                );
-                row.createCell(9).setCellValue(usuario.getEstado());
-                String fechaOriginal = usuario.getFechaRegistro();
-                DateTimeFormatter formatoEntrada = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                LocalDateTime fecha = LocalDateTime.parse(fechaOriginal, formatoEntrada);
-                DateTimeFormatter formatoSalida = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-                String fechaFormateada = fecha.format(formatoSalida);
-                row.createCell(10).setCellValue(fechaFormateada);
-            }
-            // Autoajustar columnas
-            for (int i = 0; i < headers.length; i++) {
-                sheet.autoSizeColumn(i);
-            }
-            // Escribir archivo
-            workbook.write(response.getOutputStream());
-            workbook.close();
         } catch (Exception e) {
             e.printStackTrace();
             try {

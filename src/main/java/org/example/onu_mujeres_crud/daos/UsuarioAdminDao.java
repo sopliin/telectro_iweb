@@ -5,6 +5,7 @@ import org.example.onu_mujeres_crud.beans.Rol;
 import org.example.onu_mujeres_crud.beans.Usuario;
 import org.example.onu_mujeres_crud.beans.Zona;
 import org.example.onu_mujeres_crud.dtos.DashboardDTO;
+import org.example.onu_mujeres_crud.dtos.EstadisticasEncuestaDTO;
 
 import java.sql.*;
 import java.util.*;
@@ -494,5 +495,69 @@ public class UsuarioAdminDao extends BaseDAO{
             e.printStackTrace();
         }
         return total;
+    }
+
+    public ArrayList<EstadisticasEncuestaDTO> obtenerEstadisticasEncuesta(){
+        ArrayList<EstadisticasEncuestaDTO> estadisticasEncuestaDTO = new ArrayList<>();
+        String sql = "SELECT\n" +
+                "    MIN(rd.fecha_contestacion) AS FechaContestacion,\n" +
+                "    CONCAT(coord.nombre, ' ', coord.apellido_paterno, ' ', coord.apellido_materno) AS Coordinador,\n" +
+                "    dist.nombre AS Distrito,\n" +
+                "    z.nombre AS Zona,\n" +
+                "    CONCAT(enc.nombre, ' ', enc.apellido_paterno, ' ', enc.apellido_materno) AS Encuestador,\n" +
+                "    r.dni_encuestado AS Encuestado_DNI,\n" +
+                "\n" +
+                "    MAX(CASE WHEN rd.pregunta_id = 8  THEN rd.respuesta_texto END) AS P8,\n" +
+                "    MAX(CASE WHEN rd.pregunta_id = 9  THEN po.texto_opcion END) AS P9,\n" +
+                "    MAX(CASE WHEN rd.pregunta_id = 10 THEN rd.respuesta_texto END) AS P10,\n" +
+                "    MAX(CASE WHEN rd.pregunta_id = 11 THEN po.texto_opcion   END) AS P11,\n" +
+                "    MAX(CASE WHEN rd.pregunta_id = 12 THEN po.texto_opcion   END) AS P12,\n" +
+                "    MAX(CASE WHEN rd.pregunta_id = 13 THEN po.texto_opcion   END) AS P13,\n" +
+                "    MAX(CASE WHEN rd.pregunta_id = 14 THEN rd.respuesta_texto END) AS P14,\n" +
+                "    MAX(CASE WHEN rd.pregunta_id = 17 THEN po.texto_opcion   END) AS P17,\n" +
+                "    MAX(CASE WHEN rd.pregunta_id = 18 THEN rd.respuesta_texto  END) AS P18,\n" +
+                "    MAX(CASE WHEN rd.pregunta_id = 20 THEN po.texto_opcion   END) AS P20\n" +
+                "\n" +
+                "FROM respuestas r\n" +
+                "         INNER JOIN encuestas_asignadas ea ON r.asignacion_id = ea.asignacion_id\n" +
+                "         INNER JOIN usuarios enc ON ea.encuestador_id = enc.usuario_id\n" +
+                "         INNER JOIN usuarios coord ON ea.coordinador_id = coord.usuario_id\n" +
+                "         INNER JOIN distritos dist ON enc.distrito_id = dist.distrito_id\n" +
+                "         INNER JOIN zonas z ON enc.zona_id = z.zona_id\n" +
+                "         INNER JOIN respuestas_detalle rd ON r.respuesta_id = rd.respuesta_id AND rd.pregunta_id IN (8,9,10,11,12,13,14,15,17,18,20)\n" +
+                "         LEFT JOIN pregunta_opciones po ON rd.opcion_id = po.opcion_id\n" +
+                "\n" +
+                "GROUP BY r.respuesta_id\n" +
+                "ORDER BY FechaContestacion";
+
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                EstadisticasEncuestaDTO est = new EstadisticasEncuestaDTO();
+                est.setFechaEncuesta(rs.getString("FechaContestacion"));
+                est.setCoordinador(rs.getString("Coordinador"));
+                est.setDistrito(rs.getString("Distrito"));
+                est.setZona(rs.getString("Zona"));
+                est.setEncuestador(rs.getString("Encuestador"));
+                est.setDniEncuestado(rs.getString("Encuestado_DNI"));
+                est.setRespuestaPreg8(rs.getString("P8"));
+                est.setRespuestaPreg9(rs.getString("P9"));
+                est.setRespuestaPreg10(rs.getString("P10"));
+                est.setRespuestaPreg11(rs.getString("P11"));
+                est.setRespuestaPreg12(rs.getString("P12"));
+                est.setRespuestaPreg13(rs.getString("P13"));
+                est.setRespuestaPreg14(rs.getString("P14"));
+                est.setRespuestaPreg17(rs.getString("P17"));
+                est.setRespuestaPreg18(rs.getString("P18"));
+                est.setRespuestaPreg20(rs.getString("P20"));
+
+                estadisticasEncuestaDTO.add(est);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return estadisticasEncuestaDTO;
     }
 }

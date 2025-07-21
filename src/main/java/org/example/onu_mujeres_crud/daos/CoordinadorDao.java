@@ -2,6 +2,7 @@ package org.example.onu_mujeres_crud.daos;
 import org.example.onu_mujeres_crud.beans.*;
 import org.example.onu_mujeres_crud.dtos.EstadisticasEncuestadorDTO;
 import org.example.onu_mujeres_crud.dtos.EstadisticasZonaDTO;
+import org.example.onu_mujeres_crud.dtos.RespuestaSiNoDTO;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -418,9 +419,38 @@ public class CoordinadorDao extends BaseDAO {
 
         return estadisticas;
     }
+    // Obtener estadísticas de respuestas para las preguntas SI y NO
+    public ArrayList<RespuestaSiNoDTO> obtenerEstadisticasPreguntaSiNo(int preguntaId) {
+        ArrayList<RespuestaSiNoDTO> lista = new ArrayList<>();
 
+        String sql = "SELECT po.texto_opcion, COUNT(*) AS cantidad " +
+                "FROM respuestas_detalle rd " +
+                "JOIN respuestas r ON rd.respuesta_id = r.respuesta_id " +
+                "JOIN encuestas_asignadas ea ON r.asignacion_id = ea.asignacion_id " +
+                "JOIN pregunta_opciones po ON rd.opcion_id = po.opcion_id " +
+                "WHERE po.pregunta_id = ? AND ea.estado = 'completada' " +
+                "GROUP BY po.texto_opcion";
 
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
+            pstmt.setInt(1, preguntaId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    RespuestaSiNoDTO dto = new RespuestaSiNoDTO();
+                    dto.setRespuesta(rs.getString("texto_opcion"));
+                    dto.setCantidad(rs.getInt("cantidad"));
+                    lista.add(dto);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
 }
 
 //package org.example.onu_mujeres_crud.daos;

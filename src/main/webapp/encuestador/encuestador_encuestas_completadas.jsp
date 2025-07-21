@@ -18,106 +18,40 @@
 
 	<link rel="preconnect" href="https://fonts.gstatic.com">
 	<link rel="shortcut icon" href="img/icons/icon-48x48.png" />
+	<link rel="canonical" href="https://demo-basic.adminkit.io/" />
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/onu_mujeres/static/css/app.css">
+	<link href="css/app.css" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+	<link href="${pageContext.request.contextPath}/CSS/sidebar-navbar-avatar.css" rel="stylesheet">
+
+	<title>AdminKit Demo - Bootstrap 5 Admin Template</title>
+
 	<style>
-
-		/* Sidebar mejorado */
-		.sidebar {
-			background: linear-gradient(195deg, #42424a, #191919) !important; /* Fondo oscuro elegante */
-			color: rgba(255, 255, 255, 0.8) !important;
-		}
-		.sidebar .sidebar-brand {
-			border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-		}
-		.sidebar-link {
-			color: rgba(255, 255, 255, 0.7) !important;
-			transition: all 0.2s ease-in-out;
-		}
-		/* Estilo para el elemento activo de la sidebar - como en la imagen 'Encuestadores de zona' */
-		.sidebar-item.active > .sidebar-link {
-			color: #ffffff !important;
-			background-color: transparent !important; /* Fondo transparente */
-			border-left: 5px solid #007bff; /* Borde izquierdo azul fuerte */
-			padding-left: calc(1.5rem - 5px); /* Ajustar padding para compensar el borde */
-			border-radius: 0; /* Sin bordes redondeados en este lado */
-			box-shadow: none; /* Eliminar sombra para este estilo */
-		}
-		.sidebar-item.active > .sidebar-link:hover {
-			background-color: rgba(255, 255, 255, 0.05) !important; /* Un ligero hover */
-		}
-		.sidebar-link:hover { /* Estilo de hover general */
-			color: #ffffff !important;
-			background-color: rgba(255, 255, 255, 0.1) !important;
-			border-radius: 0.5rem;
+		.table-hover thead th,
+		.table-hover tbody td {
+			padding-left: 1.2rem; /* */
+			padding-right: 1.5rem; /* */
+			vertical-align: middle; /* */
 		}
 
-		.sidebar-header {
-			color: rgba(255, 255, 255, 0.5) !important;
-			font-size: 0.75rem;
-			text-transform: uppercase;
-			letter-spacing: 0.05em;
+		.table-hover thead th:nth-child(1) { /* Nombre - Columna 1 */
+			min-width: 2rem; /* Expandido para más espacio, ajusta si es necesario */
 		}
 
-		.navbar {
-			min-height: 56px;
-			background-color: #ffffff !important; /* Navbar blanca */
-			box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-		}
-		.navbar-nav .nav-item {
-			display: flex;
-			align-items: center;
-			height: 100%;
-		}
-		.navbar-align .nav-item .dropdown-toggle {
-			display: flex;
-			align-items: center;
-			height: 100%;
-			padding-top: 0;
-			padding-bottom: 0;
-			padding-left: 1rem;
-			padding-right: 1rem;
-		}
-		/* Estilo para la imagen de perfil del usuario */
-		.user-avatar {
-			width: 36px;
-			height: 36px;
-			border-radius: 50%;
-			object-fit: cover;
-			margin-right: 0.5rem;
-			flex-shrink: 0;
-			border: 2px solid #e9ecef; /* Pequeño borde para la foto de perfil */
-		}
-		/* Contenedor del nombre y rol */
-		.navbar-align .nav-item .dropdown-toggle .user-info-container {
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
-			line-height: 1.2;
-			white-space: nowrap;
-		}
-		.navbar-align .nav-item .dropdown-toggle .user-info-container .text-dark {
-			line-height: 1.2;
-			font-weight: 600; /* Negrita para el nombre */
-			color: #344767 !important;
-		}
-		.navbar-align .nav-item .dropdown-toggle .user-info-container .text-muted {
-			font-size: 0.75em;
-			line-height: 1.2;
-			text-transform: uppercase; /* Rol en mayúsculas */
-			color: #6c757d !important;
-		}
-		/* Espaciado del botón desplegable (flecha) a la derecha del nombre/rol */
-		.navbar-align .nav-item .dropdown-toggle::after {
-			margin-left: 0.5rem;
+		.table-hover thead th:nth-child(2) { /* Descripción - Columna 2 */
+			min-width: 2rem; /* Puedes ajustar este también si la descripción es muy corta */
 		}
 
-		.nombre {
-			font-weight: bold;
+		.table-hover thead th:nth-child(3) { /* Fecha de asignación - Columna 3 */
+			min-width: 1rem;
 		}
 
-		.rol {
-			font-size: 0.9em;
-			color: #888;
+		.table-hover thead th:nth-child(4) { /* Acciones - Columna 4 */
+			min-width: 1rem;
 		}
+
 
 		.pagination-container {
 			display: flex;
@@ -130,9 +64,6 @@
 		.page-size-selector {
 			width: 80px;
 		}
-	</style>
-	<style>
-
 
 		.footer .row {
 			flex-wrap: wrap; /* Permite que los elementos se ajusten en móviles */
@@ -153,20 +84,22 @@
 			margin: 0 0.5rem; /* Espacio entre ítems */
 		}
 
+		.text {
+			color: #343a40; /* */
+			font-weight: 350; /* */
+			font-size: 0.90em; /* */
+			text-transform: uppercase; /* */
+			/*white-space: nowrap; !* *!*/
+		}
 
-
-
-
+		.description-text {
+			font-weight: 350; /* Texto en negrita */
+			color: #343a40; /* Color gris oscuro sugerido para el email */
+			font-size: 0.95em; /* Unificado el tamaño*/
+			font-style: italic;
+		}
 
 	</style>
-	<link rel="canonical" href="https://demo-basic.adminkit.io/" />
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/onu_mujeres/static/css/app.css">
-	<title>AdminKit Demo - Bootstrap 5 Admin Template</title>
-
-	<link href="css/app.css" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -174,9 +107,8 @@
 		<nav id="sidebar" class="sidebar js-sidebar">
 			<div class="sidebar-content js-simplebar">
 				<a class="sidebar-brand" href="EncuestadorServlet?action=total">
-          <span class="align-middle">ONU Mujeres</span>
-        </a>
-
+          			<span class="align-middle">ONU Mujeres</span>
+        		</a>
 				<ul class="sidebar-nav">
 					<li class="sidebar-header">
 						Encuestas
@@ -205,10 +137,7 @@
 							<i class="align-middle" data-feather="edit-3"></i> <span class="align-middle">Encuestas por hacer</span>
 						</a>
 					</li>
-					
 				</ul>
-
-				
 			</div>
 		</nav>
 
@@ -242,11 +171,9 @@
 
 			<main class="content">
 			<div class="container-fluid p-0">
-
 				<div class="mb-3">
 					<h1 class="h3 d-inline align-middle">Encuestas completadas</h1>
 				</div>
-
 				<!-- Filtro de cantidad por página -->
 				<div class="row mb-3">
 					<div class="col-md-3">
@@ -284,152 +211,177 @@
 					</div>
 				</div>
 
-				<div class="row">
-					<div class="col-12 d-flex">
-						<div class="card flex-fill">
-
-							<div class="table-responsive">
-							<table class="table table-hover my-0">
-								<thead>
-								<tr>
-
-									<th>Nombre</th>
-									<th >Descripción</th>
-									<th>Código</th>
-									<th>Coordinador</th>
-									<th>Fecha Finalización</th>
-								</tr>
-								</thead>
-								<tbody>
-								<%
-									List<EncuestaAsignada> listaEncuestas = (List<EncuestaAsignada>) request.getAttribute("listaEncuestas");
-									if (listaEncuestas != null && !listaEncuestas.isEmpty()) {
-										System.out.println("esta apareciendo el emnsaje");
-										List<EncuestaAsignada> encuestasActivas = new ArrayList<>();
-
-										// Filtra encuestas activas y completadas
-										for (EncuestaAsignada encuesta : listaEncuestas) {
-											System.out.println("contando for de completadas");
-											System.out.println(encuesta.getEncuesta().getEstado()+" "+encuesta.getEncuesta().getEstado()+" "+encuesta.getEstado());
-											if (encuesta.getEncuesta().getEstado() != null &&
-													encuesta.getEncuesta().getEstado().equalsIgnoreCase("activo") &&
-													"completada".equalsIgnoreCase(encuesta.getEstado())) {
-												System.out.println("se metio uno en comple");
-												encuestasActivas.add(encuesta);
-											}
-										}
-
-										if (!encuestasActivas.isEmpty()) {
-											for (EncuestaAsignada encuesta : encuestasActivas) {
-
-											String nombreEncuesta = encuesta.getEncuesta() != null ? encuesta.getEncuesta().getNombre() : "N/A";
-
-											String coordinador = encuesta.getCoordinador() != null ? encuesta.getCoordinador().getNombre()+" "+encuesta.getCoordinador().getApellidoPaterno() : "N/A";
-											String codigo="0"+String.valueOf(user.getUsuarioId())+"-"+"00"+String.valueOf(encuesta.getEncuesta().getEncuestaId());
-
-								%>
-								<tr>
-
-									<td><%= nombreEncuesta %></td>
-									<td ><button class="btn btn-sm btn-info" title="Ver detalles" onclick="verDetalles(<%= encuesta.getEncuesta().getEncuestaId() %>)">
-										<i class="bi bi-eye"></i>
-									</button>
-									</td>
-									<td><%=codigo %></td>
-									<td><%= coordinador %></td>
-									<td><%= encuesta.getFechaCompletado() != null
-											? new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
-											.format(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-													.parse(encuesta.getFechaCompletado()))
-											: "N/A" %></td>
-								</tr>
-								<%
-									}
-								} else {
-								%>
-								<tr>
-									<td colspan="5" class="text-center">No tienes encuestas completadas activas.</td>
-								</tr>
-								<%
-									}
-								} else {
-								%>
-								<tr>
-									<td colspan="5" class="text-center">No hay encuestas completadas.</td>
-								</tr>
-								<%
-									}
-								%>
-								</tbody>
-							</table>
-							</div>
-
-							<!-- Paginación -->
-							<!-- Paginación -->
-							<div class="pagination-container">
-								<%
-									int totalCount = (Integer) request.getAttribute("totalCount");
-									int startItem = (pageNumber - 1) * pageSize + 1;
-									int endItem = Math.min(pageNumber * pageSize, totalCount);
-								%>
-
-
-								<nav aria-label="Page navigation">
-									<ul class="pagination">
-										<li class="page-item <%= pageNumber <= 1 ? "disabled" : "" %>">
-											<a class="page-link" href="EncuestadorServlet?action=<%= action %>&page=<%= pageNumber - 1 %>&pageSize=<%= pageSize %>">Anterior</a>
-										</li>
-
+				<div class="card">
+					<div class="card-header">
+						<h5 class="card-title mb-0" style="font-size: 1.25rem">Lista de Encuestas Completadas</h5>
+					</div>
+					<div class="row">
+						<div class="col-12 d-flex">
+							<div class="card flex-fill">
+								<div class="table-responsive">
+									<table class="table table-hover my-0">
+										<thead>
+										<tr>
+											<th class="text-uppercase">Nombre de encuesta</th>
+											<th class="text-uppercase">Descripción</th>
+											<th class="d-none d-xl-table-cell text-uppercase">Código</th>
+											<th class="text-uppercase">Coordinador</th>
+											<th class="d-none d-md-table-cell text-uppercase">Fecha de Finalización</th>
+										</tr>
+										</thead>
+										<tbody>
 										<%
-											int totalPages = (int) Math.ceil((double) totalCount / pageSize);
-											int startPage = Math.max(1, pageNumber - 2);
-											int endPage = Math.min(totalPages, pageNumber + 2);
+											List<EncuestaAsignada> listaEncuestas = (List<EncuestaAsignada>) request.getAttribute("listaEncuestas");
+											if (listaEncuestas != null && !listaEncuestas.isEmpty()) {
+												System.out.println("esta apareciendo el emnsaje");
+												List<EncuestaAsignada> encuestasActivas = new ArrayList<>();
 
-											if (startPage > 1) {
+												// Filtra encuestas activas y completadas
+												for (EncuestaAsignada encuesta : listaEncuestas) {
+													System.out.println("contando for de completadas");
+													System.out.println(encuesta.getEncuesta().getEstado()+" "+encuesta.getEncuesta().getEstado()+" "+encuesta.getEstado());
+													if (encuesta.getEncuesta().getEstado() != null &&
+															encuesta.getEncuesta().getEstado().equalsIgnoreCase("activo") &&
+															"completada".equalsIgnoreCase(encuesta.getEstado())) {
+														System.out.println("se metio uno en comple");
+														encuestasActivas.add(encuesta);
+													}
+												}
+
+												if (!encuestasActivas.isEmpty()) {
+													for (EncuestaAsignada encuesta : encuestasActivas) {
+														String nombreEncuesta = encuesta.getEncuesta() != null ? encuesta.getEncuesta().getNombre() : "N/A";
+														String coordinador = encuesta.getCoordinador() != null ? encuesta.getCoordinador().getNombre()+" "+encuesta.getCoordinador().getApellidoPaterno() : "N/A";
+														String codigo="0"+String.valueOf(user.getUsuarioId())+"-"+"00"+String.valueOf(encuesta.getEncuesta().getEncuestaId());
+
 										%>
-										<li class="page-item">
-											<a class="page-link" href="EncuestadorServlet?action=<%= action %>&page=1&pageSize=<%= pageSize %>">1</a>
-										</li>
-										<% if (startPage > 2) { %>
-										<li class="page-item disabled">
-											<span class="page-link">...</span>
-										</li>
-										<% } %>
-										<% } %>
+										<tr>
+											<% String estadoEncuesta = encuesta.getEstado();
+												String dotClass = "";
+												String statusText = "";
 
-										<% for (int i = startPage; i <= endPage; i++) { %>
-										<li class="page-item <%= i == pageNumber ? "active" : "" %>">
-											<a class="page-link" href="EncuestadorServlet?action=<%= action %>&page=<%= i %>&pageSize=<%= pageSize %>"><%= i %></a>
-										</li>
-										<% } %>
+												if ("completada".equalsIgnoreCase(estadoEncuesta)) {
+													dotClass = "dot-success";
+													statusText = "Completada";
+												} else if ("en_progreso".equalsIgnoreCase(estadoEncuesta)) {
+													dotClass = "dot-warning";
+													statusText = "En progreso";
+												} else { // "por_hacer" o cualquier otro
+													dotClass = "dot-danger";
+													statusText = "Por hacer";
+												}
+											%>
+											<td class="text"><%= encuesta.getEncuesta().getNombre() %></td>
+											<td class="description-text"><%-- Lógica para truncar la descripción y mostrar "Ver más/menos" --%>
+												<% String fullDescription = encuesta.getEncuesta().getDescripcion();
+													int maxLength = 100; // Define la longitud máxima para la descripción
+													if (fullDescription != null && fullDescription.length() > maxLength) {
+														String shortDescription = fullDescription.substring(0, maxLength);
+												%>
+												<span id="corta-<%= encuesta.getEncuesta().getEncuestaId() %>"><%= shortDescription %>...</span>
+												<a href="#" onclick="toggleDescripcion('<%= encuesta.getEncuesta().getEncuestaId() %>'); return false;" id="toggle-btn-<%= encuesta.getEncuesta().getEncuestaId() %>" class="text-primary ms-1">Ver más</a>
+												<span id="completa-<%= encuesta.getEncuesta().getEncuestaId() %>" style="display:none;"><%= fullDescription %></span>
+												<% } else { %>
+												<%= fullDescription != null ? fullDescription : "" %>
+												<% } %></td>
+											<td class="d-none d-xl-table-cell text"><%= codigo %></td>
+											<td class="text"><%= encuesta.getCoordinador().getNombre() + " " + encuesta.getCoordinador().getApellidoPaterno()%></td>
+											<td class="d-none d-md-table-cell text">
+												<%= encuesta.getFechaAsignacion() != null
+														? new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
+														.format(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+																.parse(encuesta.getFechaAsignacion()))
+														: "N/A" %>
+											</td>
+											<td class="table-action text">
+												<% if (!"completada".equalsIgnoreCase(estadoEncuesta)) { %>
+												<a class="btn btn-lilac btn-sm" href="<%= request.getContextPath() %>/ContenidoEncuestaServlet?action=mostrar&asignacionId=<%= encuesta.getAsignacionId()%>" title="Completar Encuesta">
+													<i class="align-middle" data-feather="edit-2"></i>
+												</a>
+												<% } else { %>
+												<%-- Si está completada, puedes mantener un ícono deshabilitado o un tooltip, ajustado para ser consistente --%>
+												<%--                                                    <span class="text-muted" title="Encuesta Completada">--%>
+												<%--                                                        <i class="align-middle" data-feather="check-circle"></i>--%>
+												<%--                                                    </span>--%>
+												<% } %>
+											</td>
+										</tr>
+										<%
+											}
+										} else {
+										%>
+										<tr>
+											<td colspan="5" class="text-center text">No tienes encuestas completadas activas.</td>
+										</tr>
+										<%
+											}
+										} else {
+										%>
+										<tr>
+											<td colspan="5" class="text-center text">No hay encuestas completadas.</td>
+										</tr>
+										<%
+											}
+										%>
+										</tbody>
+									</table>
+								</div>
+								<!-- Paginación -->
+								<div class="pagination-container">
+									<%
+										int totalCount = (Integer) request.getAttribute("totalCount");
+										int startItem = (pageNumber - 1) * pageSize + 1;
+										int endItem = Math.min(pageNumber * pageSize, totalCount);
+									%>
+									<nav aria-label="Page navigation">
+										<ul class="pagination">
+											<li class="page-item <%= pageNumber <= 1 ? "disabled" : "" %>">
+												<a class="page-link" href="EncuestadorServlet?action=<%= action %>&page=<%= pageNumber - 1 %>&pageSize=<%= pageSize %>">Anterior</a>
+											</li>
 
-										<% if (endPage < totalPages) { %>
-										<% if (endPage < totalPages - 1) { %>
-										<li class="page-item disabled">
-											<span class="page-link">...</span>
-										</li>
-										<% } %>
-										<li class="page-item">
-											<a class="page-link" href="EncuestadorServlet?action=<%= action %>&page=<%= totalPages %>&pageSize=<%= pageSize %>"><%= totalPages %></a>
-										</li>
-										<% } %>
+											<%
+												int totalPages = (int) Math.ceil((double) totalCount / pageSize);
+												int startPage = Math.max(1, pageNumber - 2);
+												int endPage = Math.min(totalPages, pageNumber + 2);
 
-										<li class="page-item <%= pageNumber >= totalPages ? "disabled" : "" %>">
-											<a class="page-link" href="EncuestadorServlet?action=<%= action %>&page=<%= pageNumber + 1 %>&pageSize=<%= pageSize %>">Siguiente</a>
-										</li>
-									</ul>
-								</nav>
+												if (startPage > 1) {
+											%>
+											<li class="page-item">
+												<a class="page-link" href="EncuestadorServlet?action=<%= action %>&page=1&pageSize=<%= pageSize %>">1</a>
+											</li>
+											<% if (startPage > 2) { %>
+											<li class="page-item disabled">
+												<span class="page-link">...</span>
+											</li>
+											<% } %>
+											<% } %>
+											<% for (int i = startPage; i <= endPage; i++) { %>
+											<li class="page-item <%= i == pageNumber ? "active" : "" %>">
+												<a class="page-link" href="EncuestadorServlet?action=<%= action %>&page=<%= i %>&pageSize=<%= pageSize %>"><%= i %></a>
+											</li>
+											<% } %>
+											<% if (endPage < totalPages) { %>
+											<% if (endPage < totalPages - 1) { %>
+											<li class="page-item disabled">
+												<span class="page-link">...</span>
+											</li>
+											<% } %>
+											<li class="page-item">
+												<a class="page-link" href="EncuestadorServlet?action=<%= action %>&page=<%= totalPages %>&pageSize=<%= pageSize %>"><%= totalPages %></a>
+											</li>
+											<% } %>
+											<li class="page-item <%= pageNumber >= totalPages ? "disabled" : "" %>">
+												<a class="page-link" href="EncuestadorServlet?action=<%= action %>&page=<%= pageNumber + 1 %>&pageSize=<%= pageSize %>">Siguiente</a>
+											</li>
+										</ul>
+									</nav>
+								</div>
 							</div>
-
-
 						</div>
 					</div>
-
 				</div>
-
 			</div>
 		</main>
-
 			<jsp:include page="../includes/footer.jsp"/>
 		</div>
 	</div>
@@ -449,9 +401,24 @@
 			</div>
 		</div>
 	</div>
+	<script>
+		function toggleDescripcion(id) {
+			const corta = document.getElementById("corta-" + id);
+			const completa = document.getElementById("completa-" + id);
+			const boton = document.getElementById("toggle-btn-" + id);
+
+			if (completa.style.display === "none") {
+				completa.style.display = "inline";
+				corta.style.display = "none";
+				boton.textContent = "Ver menos";
+			} else {
+				completa.style.display = "none";
+				corta.style.display = "inline";
+				boton.textContent = "Ver más";
+			}
+		}
+	</script>
 	<script src="js/app.js"></script>
-
-
 	<script type="text/javascript" src="<%=request.getContextPath()%>/onu_mujeres/static/js/app.js"></script>
 	<script>
 		// Función para ver detalles del usuario
@@ -467,5 +434,4 @@
 		}
 	</script>
 </body>
-
 </html>

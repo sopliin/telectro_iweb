@@ -20,100 +20,14 @@
 <head>
     <title>Lista de Usuarios - Administrador</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <link href="${pageContext.request.contextPath}/onu_mujeres/static/css/app.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link href="${pageContext.request.contextPath}/onu_mujeres/static/css/app.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/CSS/sidebar-navbar-avatar.css" rel="stylesheet">
+
     <style>
-
-        /* Sidebar mejorado */
-        .sidebar {
-            background: linear-gradient(195deg, #42424a, #191919) !important; /* Fondo oscuro elegante */
-            color: rgba(255, 255, 255, 0.8) !important;
-        }
-        .sidebar .sidebar-brand {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .sidebar-link {
-            color: rgba(255, 255, 255, 0.7) !important;
-            transition: all 0.2s ease-in-out;
-        }
-        /* Estilo para el elemento activo de la sidebar - como en la imagen 'Encuestadores de zona' */
-        .sidebar-item.active > .sidebar-link {
-            color: #ffffff !important;
-            background-color: transparent !important; /* Fondo transparente */
-            border-left: 5px solid #007bff; /* Borde izquierdo azul fuerte */
-            padding-left: calc(1.5rem - 5px); /* Ajustar padding para compensar el borde */
-            border-radius: 0; /* Sin bordes redondeados en este lado */
-            box-shadow: none; /* Eliminar sombra para este estilo */
-        }
-        .sidebar-item.active > .sidebar-link:hover {
-            background-color: rgba(255, 255, 255, 0.05) !important; /* Un ligero hover */
-        }
-        .sidebar-link:hover { /* Estilo de hover general */
-            color: #ffffff !important;
-            background-color: rgba(255, 255, 255, 0.1) !important;
-            border-radius: 0.5rem;
-        }
-
-        .sidebar-header {
-            color: rgba(255, 255, 255, 0.5) !important;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .navbar {
-            min-height: 56px;
-            background-color: #ffffff !important; /* Navbar blanca */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .navbar-nav .nav-item {
-            display: flex;
-            align-items: center;
-            height: 100%;
-        }
-        .navbar-align .nav-item .dropdown-toggle {
-            display: flex;
-            align-items: center;
-            height: 100%;
-            padding-top: 0;
-            padding-bottom: 0;
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-        /* Estilo para la imagen de perfil del usuario */
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 0.5rem;
-            flex-shrink: 0;
-            border: 2px solid #e9ecef; /* Pequeño borde para la foto de perfil */
-        }
-        /* Contenedor del nombre y rol */
-        .navbar-align .nav-item .dropdown-toggle .user-info-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            line-height: 1.2;
-            white-space: nowrap;
-        }
-        .navbar-align .nav-item .dropdown-toggle .user-info-container .text-dark {
-            line-height: 1.2;
-            font-weight: 600; /* Negrita para el nombre */
-            color: #344767 !important;
-        }
-        .navbar-align .nav-item .dropdown-toggle .user-info-container .text-muted {
-            font-size: 0.75em;
-            line-height: 1.2;
-            text-transform: uppercase; /* Rol en mayúsculas */
-            color: #6c757d !important;
-        }
-        /* Espaciado del botón desplegable (flecha) a la derecha del nombre/rol */
-        .navbar-align .nav-item .dropdown-toggle::after {
-            margin-left: 0.5rem;
-        }
 
         .table-container {
             background-color: white;
@@ -145,15 +59,6 @@
             font-size: 0.9em; /* Ligeramente más grande*/
             text-transform: uppercase; /* Asegurar mayúsculas */
             white-space: nowrap; /* Evita que el texto se parta en varias líneas */
-        }
-
-        .nombre {
-            font-weight: bold;
-        }
-
-        .rol {
-            font-size: 0.9em;
-            color: #888;
         }
 
         /* Nuevos estilos para el círculo de estado */
@@ -297,6 +202,19 @@
             border-color: #117a8b;
         }
 
+        /* Redondear los bordes de la tarjeta de la tabla con sombra */
+        .card {
+            border-radius: 1rem; /* Aumentado el radio para un efecto más notorio */
+            overflow: hidden; /* Asegura que el contenido interno se recorte con el border-radius */
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1); /* Sombra sutil */
+        }
+
+        .card-header {
+            padding-left: 1.2rem; /* Ajuste el padding izquierdo del card-header*/
+            padding-right: 1.5rem;
+            padding-top: 1.5rem; /* Separación superior para el título */
+            padding-bottom: 1rem; /* Separación inferior para el título */
+        }
         .card-header .card-title {
             margin-bottom: 0;
             font-size: 1.25rem;
@@ -329,15 +247,6 @@
             margin-right: 8px; /* Ajusta este valor según la separación deseada */
         }
 
-        .nombre {
-            font-weight: bold;
-        }
-
-        .rol {
-            font-size: 0.9em;
-            color: #888;
-        }
-
     </style>
     <style>
         .wrapper {
@@ -345,19 +254,17 @@
             min-height: 100vh; /* Ocupa al menos el 100% del viewport */
             overflow-x: hidden;
         }
-        .sidebar {
-            height: 100vh; /* Altura completa del viewport */
+        /*.sidebar {*/
+        /*    height: 100vh; !* Altura completa del viewport *!*/
 
-            left: 0;
-            top: 0;
-            z-index: 1000; /* Asegura que esté por encima del contenido */
-            overflow-y: auto; /* Permite scroll si el contenido es muy largo */
-        }
-
+        /*    left: 0;*/
+        /*    top: 0;*/
+        /*    z-index: 1000; !* Asegura que esté por encima del contenido *!*/
+        /*    overflow-y: auto; !* Permite scroll si el contenido es muy largo *!*/
+        /*}*/
 
     </style>
     <style>
-
 
         .footer .row {
             flex-wrap: wrap; /* Permite que los elementos se ajusten en móviles */
@@ -378,14 +285,7 @@
             margin: 0 0.5rem; /* Espacio entre ítems */
         }
 
-
-
-
-
-
     </style>
-    <link href="${pageContext.request.contextPath}/onu_mujeres/static/css/app.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
 <div class="wrapper">
@@ -525,6 +425,7 @@
                                 <option value="inactivos">Solo inactivos</option>
                                 <option value="coordinadores">Coordinadores</option>
                                 <option value="encuestadores">Encuestadores</option>
+                                <option value="respuestas">Respuestas de Encuesta</option>
                             </select>
                         </div>
                         <div class="col-auto">

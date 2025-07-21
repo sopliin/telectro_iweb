@@ -1,0 +1,116 @@
+/* Sidebar*/
+.sidebar {
+    /* background: linear-gradient(195deg, #42424a, #191919) !important; /* Fondo oscuro elegante */
+    /*background: linear-gradient(195deg, #16244a, #191919) !important;*/
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.sidebar .sidebar-brand {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-link {
+    color: rgba(255, 255, 255, 0.7) !important;
+    transition: all 0.2s ease-in-out;
+}
+
+.sidebar-item.active > .sidebar-link {
+    color: #ffffff !important;
+    background: linear-gradient(90deg,rgba(240,28,116,.1),rgba(59,125,221,.0875) 50%,transparent) !important;
+    background-color: transparent !important;
+    border-left: 5px solid #f01c74 !important;
+    padding-left: calc(1.5rem - 5px);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.sidebar-item.active > .sidebar-link:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.sidebar-link:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 0.5rem;
+}
+
+.sidebar-header {
+    color: rgba(255, 255, 255, 0.5) !important;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Navbar*/
+.navbar {
+    min-height: 56px;
+    background-color: #ffffff !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.navbar-nav .nav-item {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+.navbar-align .nav-item .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* Contenedor del nombre y rol */
+.navbar-align .nav-item .dropdown-toggle .user-info-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+.navbar-align .nav-item .dropdown-toggle .user-info-container .text-dark {
+    line-height: 1.2;
+    font-weight: 600;
+    color: #344767 !important;
+}
+.navbar-align .nav-item .dropdown-toggle .user-info-container .text-muted {
+    font-size: 0.75em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: #6c757d !important;
+}
+
+/* Espaciado del botón desplegable - perfil */
+.navbar-align .nav-item .dropdown-toggle::after {
+    margin-left: 0.5rem;
+}
+
+/* Estilo para la imagen de perfil del usuario */
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+    border: 2px solid #e9ecef;
+}
+
+.nombre {
+    font-weight: bold;
+}
+
+.rol {
+    font-size: 0.9em;
+    color: #888;
+}
+
+.sidebar-content {
+    background: linear-gradient(195deg, #16244a, #191919) !important;
+}
+
+.sidebar-link, a.sidebar-link {
+    background: transparent!important;
+}

@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page import="org.example.onu_mujeres_crud.beans.Usuario" %>
 <%-- If you have the coordinator user in session, you can use it here --%>
 <% Usuario user = (Usuario) session.getAttribute("usuario"); %>
@@ -18,7 +19,10 @@
   <link rel="canonical" href="https://demo-basic.adminkit.io/" />
   <link href="${pageContext.request.contextPath}/onu_mujeres/static/css/app.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="${pageContext.request.contextPath}/CSS/sidebar-navbar-avatar.css" rel="stylesheet">
+
   <title>Perfil de Encuestador - Coordinador - Administrador</title>
+
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -144,8 +148,7 @@
       gap: 28px;
       margin-bottom: 36px;
       padding: 32px 24px 24px 24px;
-      /*background: linear-gradient(195deg, #42424a, #191919) !important; !* Fondo oscuro elegante *!*/
-      background: rgba(34,46,60,0.95) !important;
+      background: linear-gradient(7deg, #16244a, #191919) !important;
       color: rgba(255, 255, 255, 0.8) !important;
       border-radius: 1.2rem 1.2rem 0 0;
       /*box-shadow: 0 4px 16px rgba(0,123,255,0.08);*/
@@ -308,12 +311,6 @@
     .footer .list-inline-item {
       margin: 0 0.5rem; /* Espacio entre ítems */
     }
-
-
-
-
-
-
   </style>
 </head>
 <body>
@@ -383,7 +380,6 @@
         <div class="profile-header">
           <h1><i class="align-middle me-2" data-feather="user"></i> Perfil del Usuario</h1>
         </div>
-
         <div class="card shadow-sm">
           <div class="card-body">
             <h5 class="card-title mb-4"><i class="align-middle me-2" data-feather="info"></i> Detalles del <%= usuario.getRol().getNombre() %></h5>
@@ -420,6 +416,19 @@
                   </div>
                 </td>
               </tr>
+              <tr>
+                <th><i class="align-middle me-1" data-feather="clock"></i> Última Conexión</th>
+                <td>
+                  <c:choose>
+                    <c:when test="${not empty ultimaConexion}">
+                      <fmt:formatDate value="${ultimaConexion}" pattern="yyyy-MM-dd HH:mm:ss"/>
+                    </c:when>
+                    <c:otherwise>
+                      <em>No se ha conectado aún</em>
+                    </c:otherwise>
+                  </c:choose>
+                </td>
+              </tr>
             </table>
             <div class="mt-4 text-end">
               <a href="AdminServlet?action=listaUsuarios" class="btn btn-secondary"><i class="align-middle me-1" data-feather="arrow-left"></i> Volver a la lista</a>
@@ -440,76 +449,3 @@
 </script>
 </body>
 </html>
-
-
-
-
-<%--<%@ page import="org.example.onu_mujeres_crud.beans.Usuario" %>--%>
-<%--<%@ page import="java.time.format.DateTimeFormatter" %>--%>
-<%--<%@ page import="java.time.LocalDateTime" %>--%>
-<%--<%@ page contentType="text/html;charset=UTF-8" language="java" %>--%>
-<%--<%--%>
-<%--  Usuario usuario = (Usuario) request.getAttribute("detalles");--%>
-<%--%>--%>
-<%--<%@ page contentType="text/html;charset=UTF-8" language="java" %>--%>
-<%--<html>--%>
-<%--<head>--%>
-<%--    <title>Perfil de usuario</title>--%>
-<%--  <link href="${pageContext.request.contextPath}/onu_mujeres/static/css/app.css" rel="stylesheet">--%>
-<%--  <style>--%>
-
-<%--  </style>--%>
-<%--</head>--%>
-<%--<body>--%>
-<%--<main class="content">--%>
-
-<%--  <div class="container">--%>
-<%--    <div class="profile-card">--%>
-<%--      <div class="profile-header">--%>
-<%--        <% if (usuario.getProfilePhotoUrl() != null && !usuario.getProfilePhotoUrl().isEmpty()) { %>--%>
-<%--        <img src="<%= request.getContextPath() %>/fotos/<%= usuario.getProfilePhotoUrl() %>"--%>
-<%--             alt="Foto de perfil" class="profile-photo">--%>
-<%--        <% } else { %>--%>
-<%--        <div class="profile-photo bg-secondary d-flex align-items-center justify-content-center">--%>
-<%--          <span class="text-white display-4"><%= usuario.getNombre().charAt(0) %></span>--%>
-<%--        </div>--%>
-<%--        <% } %>--%>
-<%--        <h2><%= usuario.getNombre() %> <%= usuario.getApellidoPaterno() %>--%>
-<%--        </h2>--%>
-<%--        <h5 class="text-muted">Rol de <%= usuario.  getRol().getNombre() %></h5>--%>
-<%--      </div>--%>
-
-<%--      <div class="profile-info">--%>
-<%--        <div class="mb-3">--%>
-<%--          <strong>DNI:</strong> <%= usuario.getDni() %>--%>
-<%--        </div>--%>
-<%--        <div class="mb-3">--%>
-<%--          <strong>Correo:</strong> <%= usuario.getCorreo() %>--%>
-<%--        </div>--%>
-<%--        <div class="mb-3">--%>
-<%--          <strong>Estado:</strong>--%>
-<%--          <% if (usuario.getEstado().equalsIgnoreCase("activo")) { %>--%>
-<%--                                <span class="badge bg-success status-badge">Activo</span>--%>
-<%--                                <% } else { %>--%>
-<%--                                <span class="badge bg-danger status-badge">Inactivo</span>--%>
-<%--                                <% } %>--%>
-<%--        </div>--%>
-<%--        <div class="mb-3">--%>
-<%--          <%--%>
-<%--            String fechaOriginal = usuario.getFechaRegistro();--%>
-<%--            DateTimeFormatter formatoEntrada = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");--%>
-<%--            LocalDateTime fecha = LocalDateTime.parse(fechaOriginal, formatoEntrada);--%>
-<%--            DateTimeFormatter formatoSalida = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");--%>
-<%--            String fechaFormateada = fecha.format(formatoSalida);--%>
-<%--          %>--%>
-<%--          <strong>Última conexión:</strong> <%= fechaFormateada %>--%>
-<%--        </div>--%>
-
-
-<%--      </div>--%>
-<%--    </div>--%>
-<%--  </div>--%>
-<%--</main>--%>
-<%--<script src="${pageContext.request.contextPath}/onu_mujeres/static/js/app.js"></script>--%>
-<%--</body>--%>
-<%--</html>--%>

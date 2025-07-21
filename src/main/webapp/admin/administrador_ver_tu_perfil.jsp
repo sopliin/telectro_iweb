@@ -15,107 +15,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="Responsive Admin &amp; Dashboard Template based on Bootstrap 5">
     <link href="${pageContext.request.contextPath}/onu_mujeres/static/css/app.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/CSS/sidebar-navbar-avatar.css" rel="stylesheet">
 
     <style>
 
-        /* Sidebar mejorado */
-        .sidebar {
-            background: linear-gradient(195deg, #42424a, #191919) !important; /* Fondo oscuro elegante */
-            color: rgba(255, 255, 255, 0.8) !important;
-        }
-        .sidebar .sidebar-brand {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .sidebar-link {
-            color: rgba(255, 255, 255, 0.7) !important;
-            transition: all 0.2s ease-in-out;
-        }
-        /* Estilo para el elemento activo de la sidebar - como en la imagen 'Encuestadores de zona' */
-        .sidebar-item.active > .sidebar-link {
-            color: #ffffff !important;
-            background-color: transparent !important; /* Fondo transparente */
-            border-left: 5px solid #007bff; /* Borde izquierdo azul fuerte */
-            padding-left: calc(1.5rem - 5px); /* Ajustar padding para compensar el borde */
-            border-radius: 0; /* Sin bordes redondeados en este lado */
-            box-shadow: none; /* Eliminar sombra para este estilo */
-        }
-        .sidebar-item.active > .sidebar-link:hover {
-            background-color: rgba(255, 255, 255, 0.05) !important; /* Un ligero hover */
-        }
-        .sidebar-link:hover { /* Estilo de hover general */
-            color: #ffffff !important;
-            background-color: rgba(255, 255, 255, 0.1) !important;
-            border-radius: 0.5rem;
-        }
-
-        .sidebar-header {
-            color: rgba(255, 255, 255, 0.5) !important;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .navbar {
-            min-height: 56px;
-            background-color: #ffffff !important; /* Navbar blanca */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .navbar-nav .nav-item {
-            display: flex;
-            align-items: center;
-            height: 100%;
-        }
-        .navbar-align .nav-item .dropdown-toggle {
-            display: flex;
-            align-items: center;
-            height: 100%;
-            padding-top: 0;
-            padding-bottom: 0;
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-        /* Estilo para la imagen de perfil del usuario */
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 0.5rem;
-            flex-shrink: 0;
-            border: 2px solid #e9ecef; /* Pequeño borde para la foto de perfil */
-        }
-        /* Contenedor del nombre y rol */
-        .navbar-align .nav-item .dropdown-toggle .user-info-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            line-height: 1.2;
-            white-space: nowrap;
-        }
-        .navbar-align .nav-item .dropdown-toggle .user-info-container .text-dark {
-            line-height: 1.2;
-            font-weight: 600; /* Negrita para el nombre */
-            color: #344767 !important;
-        }
-        .navbar-align .nav-item .dropdown-toggle .user-info-container .text-muted {
-            font-size: 0.75em;
-            line-height: 1.2;
-            text-transform: uppercase; /* Rol en mayúsculas */
-            color: #6c757d !important;
-        }
-        /* Espaciado del botón desplegable (flecha) a la derecha del nombre/rol */
-        .navbar-align .nav-item .dropdown-toggle::after {
-            margin-left: 0.5rem;
-        }
-
-        .nombre {
-            font-weight: bold;
-        }
-
-        .rol {
-            font-size: 0.9em;
-            color: #888;
-        }
         /* Cabecera del perfil */
         .profile-header {
             display: flex;
@@ -123,7 +26,7 @@
             gap: 28px;
             margin-bottom: 36px;
             padding: 32px 24px 24px 24px;
-            background: rgba(34,46,60,0.95) !important;
+            background: linear-gradient(7deg, #16244a, #191919) !important;
             color: rgba(255, 255, 255, 0.8) !important;
             border-radius: 1.2rem 1.2rem 0 0;
         }
@@ -136,6 +39,7 @@
             box-shadow: 0 4px 16px rgba(0,123,255,0.15);
             background: #e9ecef;
         }
+
         .profile-header h1 {
             margin: 0;
             font-size: 2.2rem;
@@ -180,6 +84,7 @@
             text-transform: uppercase;
             letter-spacing: 0.04em;
         }
+
         /* Tabla de detalles */
         .table-bordered {
             border-radius: 0.7rem;
@@ -192,6 +97,7 @@
             font-family: 'Inter', sans-serif;
             vertical-align: middle;
         }
+
         .table-bordered th {
             width: 35%;
             background: #e3eafc;
@@ -204,6 +110,7 @@
         }
         .table-bordered td {
             font-weight: 500;
+            /*color: #222e3c;*/
             font-size: 0.93em;
         }
         .table-bordered tr:nth-child(even) td {
@@ -213,6 +120,7 @@
             background: #e3eafc;
             transition: background 0.2s;
         }
+
         /* Estilos para botones compactos */
         .btn-sm {
             padding: 0.5rem 1rem !important;
@@ -234,6 +142,7 @@
             padding: 1.7rem 1.5rem 1.2rem 1.5rem;
             border-radius: 1.2rem 1.2rem 0 0;
         }
+
         .card-title {
             font-size: 1.35rem;
             font-weight: 700;
@@ -259,20 +168,6 @@
             box-shadow: 0 4px 12px rgba(0, 98, 255, 0.25);
         }
 
-        .btn-outline-primary {
-            border: 2px solid #0062ff;
-            color: #0062ff;
-            background: transparent !important;
-            transition: all 0.3s ease;
-            border-radius: 0.7rem;
-            padding: 0.7rem 1.5rem;
-            font-weight: 600;
-        }
-
-        .btn-outline-primary:hover {
-            background: rgba(0, 98, 255, 0.1) !important;
-            transform: translateY(-2px);
-        }
         /* Contenedor de botones más estrecho */
         .actions-container {
             width: 80%;
@@ -417,29 +312,6 @@
                 min-height: 100px;
             }
         }
-        /* Ajustar grosor y tamaño de letra en los datos */
-        .table-bordered td {
-            font-weight: 600 !important; /* Más grueso */
-            color: #222e3c !important; /* Color más oscuro */
-            font-size: 0.95em !important; /* Un poco más grande */
-        }
-
-        /* Mejorar visibilidad de los botones */
-        .btn-outline-primary {
-            background: rgba(0, 98, 255, 0.05) !important; /* Fondo sutil */
-            border: 2px solid #0062ff !important;
-            color: #0062ff !important;
-            transition: all 0.3s ease;
-            border-radius: 0.7rem;
-            padding: 0.7rem 1.5rem;
-            font-weight: 600;
-        }
-
-        .btn-outline-primary:hover {
-            background: rgba(0, 98, 255, 0.15) !important;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 98, 255, 0.1);
-        }
 
         /* Ajustar tamaño del icono en el encabezado */
         .profile-header h1 i {
@@ -455,10 +327,6 @@
                 font-size: 0.9em !important;
             }
 
-            .btn-outline-primary {
-                padding: 0.6rem 1.2rem !important;
-            }
-
             .profile-header h1 i {
                 width: 28px !important;
                 height: 28px !important;
@@ -469,11 +337,6 @@
         @media (max-width: 576px) {
             .table-bordered td {
                 font-size: 0.85em !important;
-            }
-
-            .btn-outline-primary {
-                padding: 0.5rem 1rem !important;
-                font-size: 0.85rem !important;
             }
         }
         /* Icono de usuario en el encabezado - TAMAÑO AUMENTADO */
@@ -488,8 +351,8 @@
         /* Botones con fondo claro VISIBLE */
         .btn-outline-primary {
             background: rgba(0, 98, 255, 0.1) !important; /* Fondo más visible */
-            border: 2px solid #0062ff !important;
-            color: #0062ff !important;
+            border: 2px solid #222e3c !important;
+            color: #222e3c !important;
             transition: all 0.3s ease;
             border-radius: 0.7rem;
             padding: 0.7rem 1.5rem;
@@ -502,6 +365,7 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 98, 255, 0.15);
         }
+
         .btn-outline-primary, .btn-secondary {
             border-radius: 0.7rem;
             padding: 0.7rem 1rem; /* Reducir padding horizontal */
@@ -594,8 +458,6 @@
 
     </style>
     <style>
-
-
         .footer .row {
             flex-wrap: wrap; /* Permite que los elementos se ajusten en móviles */
         }
@@ -614,12 +476,6 @@
         .footer .list-inline-item {
             margin: 0 0.5rem; /* Espacio entre ítems */
         }
-
-
-
-
-
-
     </style>
 </head>
 <body>
@@ -649,7 +505,7 @@
                 <li class="sidebar-header">Perfil</li>
                 <li class="sidebar-item active">
                     <a class="sidebar-link" href="AdminServlet?action=verPerfil">
-                        <i class="align-middle" data-feather="user"></i> <span class="align-middle">Perfil del Administrador</span>
+                        <i class="align-middle" data-feather="user"></i> <span class="align-middle">Mi Perfil</span>
                     </a>
                 </li>
             </ul>
@@ -691,11 +547,8 @@
 
                 <div class="card shadow-sm">
                     <div class="card-body">
-
                         <div class="row">
-
-
-                            <div class="col-md-4 order-md-2">
+                            <div class="col-md-4 order-2">
                                 <div class="d-flex flex-column align-items-center">
                                     <!-- Foto de perfil -->
                                     <div class="profile-photo-container">
@@ -712,7 +565,6 @@
                                                     Cambiar contraseña
                                                 </a>
                                             </li>
-
                                             <li class="mb-2">
                                                 <form action="AdminServlet?action=uploadPhoto" method="post"
                                                       enctype="multipart/form-data" id="photoForm">
@@ -736,10 +588,7 @@
                                     </div>
                                 </div>
                             </div>
-
-
-
-                            <div class="col-md-8 order-md-1">
+                            <div class="col-md-8 order-1">
                                 <div class="table-responsive">
                                     <table class="table table-bordered mb-0">
                                         <tr>
@@ -762,11 +611,14 @@
                                             <th><i class="align-middle me-1" data-feather="home"></i> Dirección</th>
                                             <td class="text-uppercase"><%=user.getDireccion()%></td>
                                         </tr>
+                                        <tr>
+                                            <th><i class="align-middle me-1" data-feather="activity"></i> Estado</th>
+                                            <td><span class="badge <%=user.getEstado().equals("activo") ? "bg-success" : "bg-danger"%>"><i class="align-middle me-1" data-feather="<%=user.getEstado().equals("activo") ? "check-circle" : "x-circle"%>"></i><%=user.getEstado()%></span>
+                                            </td>
+                                        </tr>
                                     </table>
                                 </div>
                             </div>
-
-
                         </div>
                     </div>
                 </div>

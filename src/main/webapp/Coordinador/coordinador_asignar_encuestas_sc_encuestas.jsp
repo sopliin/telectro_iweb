@@ -17,141 +17,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link href="<%=request.getContextPath()%>/onu_mujeres/static/css/app.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="${pageContext.request.contextPath}/CSS/sidebar-navbar-avatar.css" rel="stylesheet">
 
     <title> Asignar encuestas desde la sección encuestas - Coordinador</title>
+
     <style>
 
-        /* Sidebar mejorado - Estilos copiados de coordinador_encuestadores.jsp */
-        .sidebar {
-            background: linear-gradient(195deg, #42424a, #191919) !important; /* Fondo oscuro elegante */
-            color: rgba(255, 255, 255, 0.8) !important;
-        }
-        .sidebar .sidebar-brand {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .sidebar-link {
-            color: rgba(255, 255, 255, 0.7) !important;
-            transition: all 0.2s ease-in-out;
-        }
-        /* Estilo para el elemento activo de la sidebar - como en la imagen 'Encuestadores de zona' */
-        .sidebar-item.active > .sidebar-link {
-            color: #ffffff !important;
-            background-color: transparent !important; /* Fondo transparente */
-            border-left: 5px solid #007bff; /* Borde izquierdo azul fuerte */
-            padding-left: calc(1.5rem - 5px); /* Ajustar padding para compensar el borde */
-            border-radius: 0; /* Sin bordes redondeados en este lado */
-            box-shadow: none; /* Eliminar sombra para este estilo */
-        }
-        .sidebar-item.active > .sidebar-link:hover {
-            background-color: rgba(255, 255, 255, 0.05) !important; /* Un ligero hover */
-        }
-        .sidebar-link:hover { /* Estilo de hover general */
-            color: #ffffff !important;
-            background-color: rgba(255, 255, 255, 0.1) !important;
-            border-radius: 0.5rem;
-        }
-
-        .sidebar-header {
-            color: rgba(255, 255, 255, 0.5) !important;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .sidebar-link .text-nowrap {
-            white-space: nowrap;
-        }
-
-        /* Navbar y avatar */
-        .navbar {
-            min-height: 56px;
-            background-color: #ffffff !important; /* Navbar blanca */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .navbar-nav .nav-item {
-            display: flex;
-            align-items: center;
-            height: 100%;
-        }
-        .navbar-align .nav-item .dropdown-toggle {
-            display: flex;
-            align-items: center;
-            height: 100%;
-            padding-top: 0;
-            padding-bottom: 0;
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-        /* Estilo para la imagen de perfil del usuario */
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 0.5rem;
-            flex-shrink: 0;
-            border: 2px solid #e9ecef; /* Pequeño borde para la foto de perfil */
-        }
-        /* Contenedor del nombre y rol */
-        .navbar-align .nav-item .dropdown-toggle .user-info-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            line-height: 1.2;
-            white-space: nowrap;
-        }
-        .navbar-align .nav-item .dropdown-toggle .user-info-container .text-dark {
-            line-height: 1.2;
-            font-weight: 600; /* Negrita para el nombre */
-            color: #344767 !important;
-        }
-        .navbar-align .nav-item .dropdown-toggle .user-info-container .text-muted {
-            font-size: 0.75em;
-            line-height: 1.2;
-            text-transform: uppercase; /* Rol en mayúsculas */
-            color: #6c757d !important;
-        }
-        /* Espaciado del botón desplegable (flecha) a la derecha del nombre/rol */
-        .navbar-align .nav-item .dropdown-toggle::after {
-            margin-left: 0.5rem;
-        }
-
-        .pagination .page-link {
-            color: #435ebe;
-            border: 1px solid #ddd;
-            background-color: white;
-            border-radius: 4px;
-            margin: 0 2px;
-        }
-        .page-item.active .page-link {
-            background-color: #435ebe;
-            border-color: #435ebe;
-            color: white;
-        }
-        .page-item.disabled .page-link {
-            color: #ccc;
-        }
-
-        .nombre {
-            font-weight: bold;
-        }
-
-        .rol {
-            font-size: 0.9em;
-            color: #888;
-        }
-
-    </style>
-    <style>
-
-
+        /* Footer (SIN CAMBIOS) */
         .footer .row {
             flex-wrap: wrap; /* Permite que los elementos se ajusten en móviles */
         }
@@ -163,7 +36,6 @@
         }
 
         .footer .list-inline {
-
             flex-wrap: wrap; /* Permite que los ítems se ajusten */
         }
 
@@ -171,10 +43,299 @@
             margin: 0 0.5rem; /* Espacio entre ítems */
         }
 
+        /* NUEVOS ESTILOS Y MEJORAS PARA EL CONTENIDO PRINCIPAL */
 
+        .content {
+            padding: 1.5rem; /* Padding general del contenido principal */
+        }
 
+        h1.h3 {
+            font-size: 1.75rem; /* Título principal un poco más grande y claro */
+            font-weight: 600;
+            color: #344767;
+            margin-bottom: 1.5rem;
+        }
 
+        .alert {
+            border-radius: 0.5rem;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border-color: #bee5eb;
+        }
 
+        /* Card general */
+        .card {
+            border: none; /* Eliminar borde por defecto */
+            border-radius: 0.75rem; /* Bordes más redondeados */
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.08); /* Sombra más suave y moderna */
+        }
+
+        .card-body {
+            padding: 2rem; /* Aumentar el padding dentro de la card */
+        }
+
+        /* Información de la encuesta a asignar */
+        .card-body h5 {
+            font-size: 1.2rem;
+            color: #344767;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #eee; /* Línea separadora */
+            padding-bottom: 0.5rem;
+        }
+
+        .card-body ul {
+            list-style: none; /* Quitar viñetas */
+            padding-left: 0;
+            margin-bottom: 1.5rem; /* Espacio debajo de la lista */
+        }
+
+        .card-body ul li {
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        .card-body ul li strong {
+            color: #333;
+        }
+
+        /* Filtros y buscador */
+        .row.align-items-end.justify-content-between {
+            margin-bottom: 2rem; /* Más espacio antes de la tabla */
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #444;
+            margin-bottom: 0.5rem;
+            display: block; /* Asegura que ocupe su propia línea */
+        }
+
+        .form-select, .form-control {
+            border-radius: 0.4rem;
+            font-size: 0.9rem !important; /* Reducir ligeramente el tamaño del texto en inputs */
+        }
+
+        .form-select {
+            width: 280px !important; /* Ancho fijo para el selector de distrito */
+        }
+
+        .input-group-text {
+            background-color: #f8f9fa; /* Fondo claro para el ícono de búsqueda */
+            border-right: none;
+            border-color: #dee2e6;
+            border-radius: 0.4rem 0 0 0.4rem;
+        }
+
+        .input-group .form-control.border-start-0 {
+            border-radius: 0 0.4rem 0.4rem 0;
+        }
+
+        .input-group .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); /* Sombra azul al enfocar */
+            border-color: #80bdff;
+        }
+
+        /* Tabla */
+        .table-responsive {
+            margin-top: 1.5rem;
+            border: 1px solid #e9ecef; /* Borde sutil alrededor de la tabla */
+            border-radius: 0.5rem;
+            overflow-x: auto; /* Para tablas muy anchas en móviles */
+        }
+
+        .table {
+            margin-bottom: 0; /* Eliminar margen inferior de la tabla */
+            border-collapse: separate; /* Necesario para que border-radius funcione en thead */
+            border-spacing: 0;
+        }
+
+        .table thead th {
+            background-color: #f8f9fa; /* Fondo para el encabezado de la tabla */
+            color: #555;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 0.85rem 1rem;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .table tbody td {
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+            font-size: 0.88rem; /* Tamaño de fuente para celdas */
+            color: #495057;
+            border-bottom: 1px solid #e9ecef; /* Borde inferior para cada fila */
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none; /* Eliminar borde inferior de la última fila */
+        }
+
+        .table tbody tr:hover {
+            background-color: #f2f6fc; /* Ligero hover en las filas */
+        }
+
+        /* Mensaje de "No hay encuestadores" */
+        .table td div.text-center.text-muted {
+            padding: 1.5rem 0;
+            font-size: 1rem;
+            color: #888 !important;
+        }
+        .table td div.text-center.text-muted i {
+            font-size: 1.2rem;
+            vertical-align: middle;
+        }
+
+        /* Acciones de la tabla */
+        .form-control-sm {
+            padding: 0.35rem 0.65rem;
+            font-size: 0.85rem;
+            height: auto; /* Asegurar que no se estire demasiado */
+            width: 3rem;
+            flex-grow: 1; /* Permite que el input crezca para ocupar espacio disponible si está dentro de un flexbox */
+        }
+
+        .btn-sm {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.85rem;
+            border-radius: 0.3rem;
+            white-space: nowrap; /* Mantener el botón en una sola línea */
+        }
+
+        .badge {
+            font-size: 0.75em;
+            padding: 0.4em 0.7em;
+            border-radius: 0.3rem;
+            white-space: normal; /* PERMITE QUE EL TEXTO DEL BADGE SE ENVUELVA SI ES NECESARIO */
+            display: inline-block; /* Asegura que el padding y el margin funcionen correctamente */
+            text-align: center; /* Centra el texto si se envuelve */
+        }
+
+        /* Añadir un estilo para la celda de acciones para usar flexbox */
+        .table tbody td:last-child {
+            width: 1%; /* Intenta que la columna ocupe el mínimo espacio necesario */
+            white-space: nowrap; /* Esto es para que la celda misma no se rompa, pero el contenido interno sí si se permite */
+        }
+
+        /* Estilo para el contenedor del formulario dentro de las acciones */
+        .d-flex.align-items-center.gap-2 {
+            flex-wrap: nowrap; /* Evita que el input y el botón se envuelvan */
+            justify-content: flex-end; /* Alinea el contenido a la derecha dentro de la celda */
+        }
+
+        .text-danger.small {
+            font-size: 0.75rem; /* Ajustar tamaño para mensajes de error */
+            margin-top: 0.25rem;
+            display: block; /* Asegura que ocupe su propia línea */
+        }
+
+        /* Paginación */
+        .pagination {
+            margin-top: 1.5rem;
+            margin-bottom: 0;
+        }
+        .pagination .page-item .page-link {
+            border-radius: 0.4rem;
+            margin: 0 0.2rem;
+            padding: 0.5rem 0.8rem;
+            font-size: 0.9rem;
+            border: 1px solid #dee2e6;
+            color: #007bff;
+            transition: all 0.2s ease-in-out;
+        }
+        .pagination .page-item .page-link:hover {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+            color: #0056b3;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: white;
+            z-index: 2; /* Para que quede por encima de los bordes adyacentes */
+        }
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            cursor: not-allowed;
+        }
+
+        /* Botón de volver */
+        .mt-4 .btn-secondary {
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+            color: #ffffff;
+            background-color: #16244a !important;
+            border-color: #191919;
+        }
+        .mt-4 .btn-secondary:hover {
+            background-color: #dae0e5;
+            border-color: #dae0e5;
+        }
+
+        /* Ajustes para íconos de Feather */
+        [data-feather] {
+            width: 1rem;
+            height: 1rem;
+            vertical-align: text-bottom;
+        }
+
+        .text {
+            color: #343a40; /* Color gris oscuro */
+            font-weight: 350;
+            font-size: 0.9em; /* Ligeramente más grande*/
+            text-transform: uppercase; /* Asegurar mayúsculas */
+            white-space: nowrap; /* Evita que el texto se parta en varias líneas */
+        }
+
+        .cursiva-text {
+            font-weight: 350; /* Texto en negrita */
+            color: #343a40; /* Color gris oscuro sugerido para el email */
+            font-size: 0.95em; /* Unificado el tamaño*/
+            white-space: nowrap; /* Evita que el texto se parta en varias líneas */
+            font-style: italic;
+        }
+
+        .btn-outline-primary {
+            border-color: #f01c74;
+            background: #f01c74;
+            color: #ffffff;
+        }
+
+        /* Botón de volver */
+        .btn-secondary {
+            background: #222e3c;
+            border: none;
+            color: #fff;
+            padding: 0.7rem 1.5rem;
+            border-radius: 0.7rem;
+            font-weight: 700;
+            font-size: 1.05em;
+            transition: all 0.2s cubic-bezier(.4,0,.2,1);
+            box-shadow: 0 2px 8px rgba(52,71,103,0.08);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(90deg, #222e3c 0%, #343a40 100%);
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 4px 16px rgba(52,71,103,0.15);
+        }
+
+        .bg-danger {
+            background-color: #6f42c1 !important;
+        }
 
     </style>
 </head>
@@ -246,74 +407,75 @@
                 </ul>
             </div>
         </nav>
-
         <main class="content">
-            <div class="container-fluid p-0">
-                <h1 class="h3 mb-3">Asignar Encuesta a Encuestador</h1>
-
+            <div class="container-fluid p-4">
+                <h1 class="h3 mb-4 fw-bold" style="color: #16244a">Asignación de Encuestas</h1>
+                <!-- Alertas -->
                 <c:if test="${param.mensaje == 'asignacionExitosa'}">
-                    <div class="alert alert-success">✅ Encuesta asignada correctamente.</div>
+                    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                        ✅ Encuesta asignada correctamente.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
                 </c:if>
 
                 <c:if test="${not empty carpetaSeleccionada}">
-                    <div class="alert alert-info mb-3">
+                    <div class="alert alert-info shadow-sm mb-4">
                         Carpeta seleccionada: <strong>${carpetaSeleccionada}</strong>
                     </div>
                 </c:if>
 
-                <div class="card shadow-sm">
+                <!-- Card de Detalles -->
+                <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body">
-                        <c:if test="${not empty encuestaId}">
-                            <div class="mb-4">
-                                <h5>Encuesta a asignar:</h5>
-                                <ul class="mb-0">
 
-                                    <li><strong>Nombre:</strong> ${encuestaSeleccionada.nombre}</li>
-                                    <li><strong>Descripción:</strong> ${encuestaSeleccionada.descripcion}</li>
-                                </ul>
-                            </div>
+                        <c:if test="${not empty encuestaId}">
+                            <h5 class="fw-semibold text-dark border-bottom pb-2 mb-3">Detalles de la encuesta</h5>
+                            <ul class="list-unstyled small text-secondary mb-4">
+                                <li><strong>Nombre:</strong> ${encuestaSeleccionada.nombre}</li>
+                                <li><strong>Descripción:</strong> ${encuestaSeleccionada.descripcion}</li>
+                            </ul>
                         </c:if>
 
-                        <!-- Filtros: Distrito y Buscador alineados -->
-                        <div class="row mb-4 align-items-end justify-content-between">
+                        <!-- Filtros y buscador -->
+                        <div class="row gy-3 align-items-end justify-content-between mb-4">
                             <div class="col-md-auto">
                                 <c:if test="${not empty listaDistritos}">
-                                    <form method="get" action="CoordinadorServlet" class="mb-0">
+                                    <form method="get" action="CoordinadorServlet" class="d-inline">
                                         <input type="hidden" name="action" value="filtrarAsignar" />
                                         <input type="hidden" name="encuestaId" value="${encuestaId}" />
                                         <input type="hidden" name="carpeta" value="${carpetaSeleccionada}" />
-                                        <label for="distrito" class="form-label">Distrito:</label>
-                                        <select name="distritoId" id="distrito" class="form-select" style="width: 250px;" onchange="this.form.submit()">
-                                            <option value="">-- Seleccione Distrito --</option>
+
+                                        <label for="distrito" class="form-label text-secondary text-uppercase small">Filtrar por distrito</label>
+                                        <select name="distritoId" id="distrito" class="form-select form-select-sm" onchange="this.form.submit()">
+                                            <option value="">-- Todos los Distritos --</option>
                                             <c:forEach var="distrito" items="${listaDistritos}">
-                                                <option value="${distrito.distritoId}" ${distritoSeleccionado == distrito.distritoId ? 'selected' : ''}>${distrito.nombre}</option>
+                                                <option value="${distrito.distritoId}" ${distritoSeleccionado == distrito.distritoId ? 'selected' : ''}>
+                                                        ${distrito.nombre}
+                                                </option>
                                             </c:forEach>
                                         </select>
                                     </form>
                                 </c:if>
                             </div>
-
                             <div class="col-md-auto">
-                                <div class="input-group" style="max-width: 220px;">
-            <span class="input-group-text bg-white border-end-0" style="background: transparent;">
-                <i data-feather="search"></i>
-            </span>
-                                    <input type="text" id="buscadorEncuestadores" class="form-control border-start-0" placeholder="Buscar..." aria-label="Buscar">
+                                <label for="buscadorEncuestadores" class="form-label text-secondary text-uppercase small">Buscar Encuestador</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light border-end-0"><i data-feather="search"></i></span>
+                                    <input type="text" id="buscadorEncuestadores" class="form-control border-start-0" placeholder="Nombre, DNI, correo...">
                                 </div>
                             </div>
                         </div>
 
-
-                        <!-- Lista de Encuestadores -->
-                        <h5 class="mb-3">Encuestadores encontrados:</h5>
-                        <div class="table-responsive">
-                            <table class="table table-hover my-0" id="tablaEncuestadores">
-                                <thead>
-                                <tr>
-                                    <th>Nombre</th>
+                        <!-- Tabla -->
+                        <h5 class="fw-semibold text-dark mb-3">Lista de Encuestadores</h5>
+                        <div class="table-responsive border rounded-3">
+                            <table class="table table-hover align-middle mb-0" id="tablaEncuestadores">
+                                <thead class="table-light">
+                                <tr class="small text-uppercase text-muted">
+                                    <th>Nombre Completo</th>
                                     <th>DNI</th>
-                                    <th>Correo</th>
-                                    <th>Zona/Distrito</th>
+                                    <th>Correo Electrónico</th>
+                                    <th>Zona / Distrito</th>
                                     <th>Acciones</th>
                                 </tr>
                                 </thead>
@@ -322,8 +484,8 @@
                                     <c:when test="${empty listaEncuestadores}">
                                         <tr>
                                             <td colspan="5">
-                                                <div class="text-center text-muted my-2">
-                                                    <i data-feather="alert" class="me-1"></i> No hay encuestadores registrados.
+                                                <div class="text-center text-muted py-4">
+                                                    <i data-feather="info" class="me-2"></i> No se encontraron encuestadores.
                                                 </div>
                                             </td>
                                         </tr>
@@ -331,33 +493,36 @@
                                     <c:otherwise>
                                         <c:forEach var="e" items="${listaEncuestadores}">
                                             <tr>
-                                                <td>${e.nombre} ${e.apellidoPaterno} ${e.apellidoMaterno}</td>
+                                                <td class="text-nowrap">${e.nombre} ${e.apellidoPaterno} ${e.apellidoMaterno}</td>
                                                 <td>${e.dni}</td>
-                                                <td>${e.correo}</td>
+                                                <td class="fst-italic text-secondary">${e.correo}</td>
                                                 <td>${e.zona.nombre} / ${e.distrito.nombre}</td>
                                                 <td>
                                                     <c:choose>
                                                         <c:when test="${e.estado == 'activo'}">
                                                             <form method="post" action="CoordinadorServlet" class="d-flex align-items-center gap-2">
                                                                 <input type="hidden" name="action" value="guardarAsignacionDesdeEncuestas" />
-                                                                <input type="hidden" name="idEncuestador" value="${e.usuarioId}"
-                                                                       data-nombre="${e.nombre} ${e.apellidoPaterno} ${e.apellidoMaterno}" />
+                                                                <input type="hidden" name="idEncuestador" value="${e.usuarioId}" data-nombre="${e.nombre} ${e.apellidoPaterno} ${e.apellidoMaterno}" />
                                                                 <input type="hidden" name="encuestaId" value="${encuestaId}" />
                                                                 <input type="hidden" name="carpeta" value="${carpetaSeleccionada}" />
                                                                 <input type="hidden" name="zonaId" value="${zonaSeleccionada}" />
                                                                 <input type="hidden" name="distritoId" value="${distritoSeleccionado}" />
-                                                                <input type="number" name="cantidad" min="1" value="10" required class="form-control form-control-sm" style="width: 80px;" />
-                                                                <button type="button" class="btn btn-primary btn-sm"
+
+                                                                <input type="number" name="cantidad" min="1" max="1000" step="1" value="1"
+                                                                       class="form-control form-control-sm">
+
+                                                                <button type="button" class="btn btn-sm btn-outline-primary"
                                                                         onclick="confirmarAsignacionDesdeListado(this)">
-                                                                    Asignar
+                                                                    <i data-feather="send" class="me-1"></i>Asignar
                                                                 </button>
+
                                                                 <div class="text-danger small mt-1 d-none" id="error-cantidad-${e.usuarioId}">
-                                                                    ⚠ El valor debe ser superior o igual a 1
+                                                                    Debe asignar al menos 1 encuesta.
                                                                 </div>
                                                             </form>
                                                         </c:when>
                                                         <c:otherwise>
-                                                            <span class="badge bg-danger">Baneado</span>
+                                                            <span class="badge bg-danger">Este usuario fue baneado</span>
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </td>
@@ -368,42 +533,42 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- Paginación -->
                         <c:if test="${not empty totalPaginas and not empty listaEncuestadores}">
-                            <div class="d-flex flex-column justify-content-center align-items-center mt-4">
-                                <nav aria-label="Paginación">
-                                    <ul class="pagination justify-content-center">
-                                        <c:set var="accionPaginacion" value="filtrarAsignar"/>
-                                        <li class="page-item ${paginaActual == 1 ? 'disabled' : ''}">
+                            <nav class="mt-4">
+                                <ul class="pagination justify-content-center small">
+                                    <c:set var="accionPaginacion" value="filtrarAsignar"/>
+                                    <li class="page-item ${paginaActual == 1 ? 'disabled' : ''}">
+                                        <a class="page-link"
+                                           href="CoordinadorServlet?action=${accionPaginacion}&page=${paginaActual - 1}&encuestaId=${encuestaId}&carpeta=${carpetaSeleccionada}<c:if test='${not empty distritoSeleccionado}'>&distritoId=${distritoSeleccionado}</c:if>">
+                                            Anterior
+                                        </a>
+                                    </li>
+                                    <c:forEach begin="1" end="${totalPaginas}" var="i">
+                                        <li class="page-item ${i == paginaActual ? 'active' : ''}">
                                             <a class="page-link"
-                                               href="CoordinadorServlet?action=${accionPaginacion}&page=${paginaActual - 1}&encuestaId=${encuestaId}&carpeta=${carpetaSeleccionada}<c:if test='${not empty distritoSeleccionado}'>&distritoId=${distritoSeleccionado}</c:if>">
-                                                Anterior
+                                               href="CoordinadorServlet?action=${accionPaginacion}&page=${i}&encuestaId=${encuestaId}&carpeta=${carpetaSeleccionada}<c:if test='${not empty distritoSeleccionado}'>&distritoId=${distritoSeleccionado}</c:if>">
+                                                    ${i}
                                             </a>
                                         </li>
-                                        <c:forEach begin="1" end="${totalPaginas}" var="i">
-                                            <li class="page-item ${i == paginaActual ? 'active' : ''}">
-                                                <a class="page-link"
-                                                   href="CoordinadorServlet?action=${accionPaginacion}&page=${i}&encuestaId=${encuestaId}&carpeta=${carpetaSeleccionada}<c:if test='${not empty distritoSeleccionado}'>&distritoId=${distritoSeleccionado}</c:if>">
-                                                        ${i}
-                                                </a>
-                                            </li>
-                                        </c:forEach>
-                                        <li class="page-item ${paginaActual == totalPaginas ? 'disabled' : ''}">
-                                            <a class="page-link"
-                                               href="CoordinadorServlet?action=${accionPaginacion}&page=${paginaActual + 1}&encuestaId=${encuestaId}&carpeta=${carpetaSeleccionada}<c:if test='${not empty distritoSeleccionado}'>&distritoId=${distritoSeleccionado}</c:if>">
-                                                Siguiente
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </nav>
-                            </div>
+                                    </c:forEach>
+                                    <li class="page-item ${paginaActual == totalPaginas ? 'disabled' : ''}">
+                                        <a class="page-link"
+                                           href="CoordinadorServlet?action=${accionPaginacion}&page=${paginaActual + 1}&encuestaId=${encuestaId}&carpeta=${carpetaSeleccionada}<c:if test='${not empty distritoSeleccionado}'>&distritoId=${distritoSeleccionado}</c:if>">
+                                            Siguiente
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
                         </c:if>
 
-                        <!-- Volver -->
-                        <div class="mt-4">
-                            <a href="CoordinadorServlet?action=listarEncuestas&carpeta=${carpetaSeleccionada}" class="btn btn-secondary">← Volver a encuestas</a>
+                        <div class="mt-4 text-end">
+                            <a href="CoordinadorServlet?action=listarEncuestas&carpeta=${carpetaSeleccionada}" class="btn btn-secondary"><i class="align-middle me-1" data-feather="arrow-left"></i> Volver a la lista</a>
                         </div>
                     </div>
                 </div>
+
             </div>
         </main>
 
@@ -411,12 +576,17 @@
     </div>
 </div>
 
-<!-- Scripts -->
 <script src="<%=request.getContextPath()%>/onu_mujeres/static/js/app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         feather.replace();
+
+        // Inicializar alertas de Bootstrap
+        var alertList = document.querySelectorAll('.alert');
+        alertList.forEach(function (alert) {
+            new bootstrap.Alert(alert)
+        });
 
         const input = document.getElementById("buscadorEncuestadores");
         const tabla = document.getElementById("tablaEncuestadores")?.getElementsByTagName("tbody")[0];
@@ -434,6 +604,24 @@
 </script>
 
 <script>
+    // Esta función ha sido simplificada y mejorada para usar la validación nativa de HTML5
+    function confirmarAsignacionDesdeListado(boton) {
+        const form = boton.closest('form');
+        const inputCantidad = form.querySelector('input[name="cantidad"]');
+
+        // Dispara la validación nativa del navegador (basada en 'min' y 'required')
+        if (!inputCantidad.reportValidity()) {
+            return; // Detiene la ejecución si la validación falla
+        }
+
+        const nombre = form.querySelector('input[name="idEncuestador"]').dataset.nombre;
+
+        if (confirm("¿Está seguro de asignar " + inputCantidad.value + " encuestas a " + nombre + "?")) {
+            form.submit();
+        }
+    }
+</script>
+<script>
     function confirmarAsignacion(nombreEncuestador, inputCantidad, usuarioId) {
         const cantidad = parseInt(inputCantidad.value);
         const errorDiv = document.getElementById('error-cantidad-' + usuarioId);
@@ -447,18 +635,19 @@
             inputCantidad.classList.remove('is-invalid');
         }
 
-        return confirm(`¿Está seguro de realizar esta asignación a ${nombreEncuestador}?`);
+        return confirm("¿Está seguro de realizar esta asignación a ${nombreEncuestador}?");
     }
 </script>
-
 <script>
     function confirmarAsignacionDesdeListado(boton) {
         const form = boton.closest('form');
         const inputCantidad = form.querySelector('input[name="cantidad"]');
-        const valor = parseInt(inputCantidad.value);
+        const valorStr = inputCantidad.value.trim();
+        const valor = Number(valorStr);
 
-        if (isNaN(valor) || valor < 1) {
-            inputCantidad.reportValidity(); // Usará el mensaje nativo del navegador
+        // Validar si es un número entero entre 1 y 1000
+        if (!Number.isInteger(valor) || valor < 1 || valor > 1000) {
+            inputCantidad.reportValidity(); // Muestra mensaje nativo si input tiene min/step
             return;
         }
 

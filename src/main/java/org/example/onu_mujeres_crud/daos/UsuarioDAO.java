@@ -205,6 +205,10 @@ public class UsuarioDAO extends BaseDAO{
                         valido = false;
                     } else if (mailDB.equals(mail) && passwdDB.equals(passwd)){
                         valido = true;
+                        Usuario usuario = usuarioByEmail(mail);
+                        if (usuario != null) {
+                            actualizarUltimaConexion(usuario.getUsuarioId());
+                        }
                     }
                 }
 
@@ -605,4 +609,45 @@ public class UsuarioDAO extends BaseDAO{
         }
     }
 
+    //ultima hora de conexión
+    public Timestamp obtenerUltimaConexionPorCorreo(String correo) {
+        Timestamp ultimaConexion = null;
+
+        try {
+            Connection conn = getConnection(); // ← Usa el método de BaseDAO
+            String sql = "SELECT ultima_conexion FROM usuarios WHERE correo = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, correo);
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                ultimaConexion = rs.getTimestamp("ultima_conexion");
+            }
+
+            rs.close();
+            stmt.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace(); // Puedes cambiar a logger si lo usas
+        }
+
+        return ultimaConexion;
+    }
+
+
+    //actualizar la ultima hora de conexión
+    public void actualizarUltimaConexion(int usuarioId) {
+        String sql = "UPDATE usuarios SET ultima_conexion = NOW() WHERE usuario_id = ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, usuarioId);
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace(); // puedes usar logger también
+        }
+    }
+    
 }

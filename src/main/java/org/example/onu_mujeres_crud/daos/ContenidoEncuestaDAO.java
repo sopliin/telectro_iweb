@@ -100,33 +100,29 @@ public class ContenidoEncuestaDAO extends BaseDAO { // Asumiendo que BaseDAO pro
 
             // 1. Insertar o actualizar en la tabla 'respuestas'
             Integer respuestaIdExistente = null;
-            String checkRespuestaSql = "SELECT respuesta_id FROM onu_mujeres.respuestas WHERE asignacion_id = ? AND dni_encuestado = ?;";
+            String checkRespuestaSql = "SELECT respuesta_id FROM onu_mujeres.respuestas WHERE asignacion_id = ? ";
             try (PreparedStatement psCheck = conn.prepareStatement(checkRespuestaSql)) {
                 psCheck.setInt(1, respuesta.getAsignacion().getAsignacionId());
-                psCheck.setString(2, respuesta.getDniEncuestado());
-                System.out.println(respuesta.getDniEncuestado());
+
                 try (ResultSet rsCheck = psCheck.executeQuery()) {
                     if (rsCheck.next()) {
                         respuestaIdExistente = rsCheck.getInt("respuesta_id");
-                        // Si existe, actualizar fecha_ultima_edicion
-                        String updateRespuestaSql = "UPDATE onu_mujeres.respuestas SET fecha_ultima_edicion = ? WHERE respuesta_id = ?;";
+                        respuesta.setRespuestaId(respuestaIdExistente);
+                        //Actualizar fecha_ultima_edicion (fecha de última modificación/guardado borrador)
+                        String updateRespuestaSql = "UPDATE onu_mujeres.respuestas SET fecha_ultima_edicion = ?, dni_encuestado=? WHERE respuesta_id = ?";
                         try (PreparedStatement psUpdateRespuesta = conn.prepareStatement(updateRespuestaSql)) {
                             psUpdateRespuesta.setString(1, respuesta.getFechaEnvio());
-                            psUpdateRespuesta.setInt(2, respuestaIdExistente);
-                            psUpdateRespuesta.executeUpdate();
-                        }//ever
-                        String updateRespuestaSql1 = "UPDATE onu_mujeres.encuestas_asignadas SET fecha_completado = ? WHERE asignacion_id = ?;";
-                        try (PreparedStatement psUpdateRespuesta = conn.prepareStatement(updateRespuestaSql1)) {
-                            psUpdateRespuesta.setString(1, respuesta.getFechaEnvio());
-                            psUpdateRespuesta.setInt(2, respuesta.getAsignacion().getAsignacionId());
+                            psUpdateRespuesta.setString(2, respuesta.getDniEncuestado());
+                            psUpdateRespuesta.setInt(3, respuestaIdExistente);
                             psUpdateRespuesta.executeUpdate();
                         }
-                        //ever final
                     }
+
                 }
             }
 
             if (respuestaIdExistente == null) {
+                System.out.println("se ingrso 2 veces");
                 // Si no existe, insertar nueva respuesta
                 String insertRespuestaSql = "INSERT INTO onu_mujeres.respuestas (dni_encuestado, asignacion_id, fecha_inicio, fecha_ultima_edicion) VALUES (?,?,?,?)";
                 try (PreparedStatement pstmtRespuesta = conn.prepareStatement(insertRespuestaSql, Statement.RETURN_GENERATED_KEYS)) {
@@ -218,44 +214,54 @@ public class ContenidoEncuestaDAO extends BaseDAO { // Asumiendo que BaseDAO pro
             conn = this.getConnection();
             conn.setAutoCommit(false); // Iniciar transacción
 
-            // 1. Insertar o actualizar en la tabla 'respuestas'
             Integer respuestaIdExistente = null;
-            String checkRespuestaSql = "SELECT respuesta_id FROM onu_mujeres.respuestas WHERE asignacion_id = ? AND dni_encuestado = ?";
+            String checkRespuestaSql = "SELECT respuesta_id FROM onu_mujeres.respuestas WHERE asignacion_id = ? ";
             try (PreparedStatement psCheck = conn.prepareStatement(checkRespuestaSql)) {
                 psCheck.setInt(1, respuesta.getAsignacion().getAsignacionId());
-                psCheck.setString(2, respuesta.getDniEncuestado());
+
                 try (ResultSet rsCheck = psCheck.executeQuery()) {
                     if (rsCheck.next()) {
                         respuestaIdExistente = rsCheck.getInt("respuesta_id");
-                        // Actualizar fecha_ultima_edicion (fecha de última modificación/guardado borrador)
-                        String updateRespuestaSql = "UPDATE onu_mujeres.respuestas SET fecha_ultima_edicion = ? WHERE respuesta_id = ?";
+                        respuesta.setRespuestaId(respuestaIdExistente);
+                        //Actualizar fecha_ultima_edicion (fecha de última modificación/guardado borrador)
+                        String updateRespuestaSql = "UPDATE onu_mujeres.respuestas SET fecha_ultima_edicion = ?, dni_encuestado=? WHERE respuesta_id = ?";
                         try (PreparedStatement psUpdateRespuesta = conn.prepareStatement(updateRespuestaSql)) {
                             psUpdateRespuesta.setString(1, respuesta.getFechaEnvio());
-                            psUpdateRespuesta.setInt(2, respuestaIdExistente);
+                            psUpdateRespuesta.setString(2, respuesta.getDniEncuestado());
+                            psUpdateRespuesta.setInt(3, respuestaIdExistente);
                             psUpdateRespuesta.executeUpdate();
                         }
                     }
-                }
-            }
+                    else {
+                        String insertRespuestaSql = "INSERT INTO onu_mujeres.respuestas (dni_encuestado, asignacion_id, fecha_inicio, fecha_ultima_edicion) VALUES (?,?,?,?)";
+                        try (PreparedStatement pstmtRespuesta = conn.prepareStatement(insertRespuestaSql, Statement.RETURN_GENERATED_KEYS)) {
+                            pstmtRespuesta.setString(1, respuesta.getDniEncuestado());
+                            pstmtRespuesta.setInt(2, respuesta.getAsignacion().getAsignacionId());
+                            pstmtRespuesta.setString(3, respuesta.getFechaInicio());
+                            pstmtRespuesta.setString(4, respuesta.getFechaEnvio());
+                            pstmtRespuesta.executeUpdate();
 
-            if (respuestaIdExistente == null) {
-                String insertRespuestaSql = "INSERT INTO onu_mujeres.respuestas (dni_encuestado, asignacion_id, fecha_inicio, fecha_ultima_edicion) VALUES (?,?,?,?)";
-                try (PreparedStatement pstmtRespuesta = conn.prepareStatement(insertRespuestaSql, Statement.RETURN_GENERATED_KEYS)) {
-                    pstmtRespuesta.setString(1, respuesta.getDniEncuestado());
-                    pstmtRespuesta.setInt(2, respuesta.getAsignacion().getAsignacionId());
-                    pstmtRespuesta.setString(3, respuesta.getFechaInicio());
-                    pstmtRespuesta.setString(4, respuesta.getFechaEnvio());
-                    pstmtRespuesta.executeUpdate();
-
-                    try (ResultSet rs = pstmtRespuesta.getGeneratedKeys()) {
-                        if (rs.next()) {
-                            respuesta.setRespuestaId(rs.getInt(1));
+                            try (ResultSet rs = pstmtRespuesta.getGeneratedKeys()) {
+                                if (rs.next()) {
+                                    respuesta.setRespuestaId(rs.getInt(1));
+                                }
+                            }
                         }
                     }
                 }
-            } else {
-                respuesta.setRespuestaId(respuestaIdExistente);
             }
+
+
+
+
+
+
+
+
+
+
+
+
 
             // 2. Eliminar detalles antiguos y insertar nuevos en la tabla 'respuesta_detalle'
             if (respuesta.getRespuestaId() > 0) {
@@ -325,6 +331,20 @@ public class ContenidoEncuestaDAO extends BaseDAO { // Asumiendo que BaseDAO pro
                 }
             }
         }
+    }
+    public String obtenerEstadoEncuestaAsignada(int asignacionId) throws SQLException {
+        String sql = "SELECT estado FROM onu_mujeres.encuestas_asignadas WHERE asignacion_id = ?";
+        try (Connection conn = this.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, asignacionId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    System.out.println(" si entro a obtener estado");
+                    return rs.getString("estado");
+                }
+            }
+        }
+        return null; // O lanza una excepción si prefieres
     }
 
 
@@ -446,6 +466,24 @@ public class ContenidoEncuestaDAO extends BaseDAO { // Asumiendo que BaseDAO pro
             }
         }
         return asignacion;
+    }
+    public boolean verificarDniEnAsignacionesCompletadas(String dniEncuestado) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM onu_mujeres.respuestas r " +
+                "JOIN encuestas_asignadas ea ON r.asignacion_id = ea.asignacion_id " +
+                "WHERE r.dni_encuestado = ? AND ea.estado = 'completada' " ;
+
+
+        try (Connection conn = this.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, dniEncuestado);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
     }
 }
 

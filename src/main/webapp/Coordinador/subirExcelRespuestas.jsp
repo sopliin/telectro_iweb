@@ -12,14 +12,13 @@
     <meta name="description" content="ONU Mujeres - Subir Respuestas de Excel">
     <meta name="author" content="ONU Mujeres">
     <meta name="keywords" content="onu, mujeres, encuestas, administración, excel, subir">
-
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel="shortcut icon" href="img/icons/icon-48x48.png"/>
-
-    <title>Subir Respuestas de Excel - Coordinador</title>
-
     <link href="${pageContext.request.contextPath}/onu_mujeres/static/css/app.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/CSS/sidebar-navbar-avatar.css" rel="stylesheet">
+
+    <title>Subir Respuestas de Excel - Coordinador</title>
 
     <style>
         /* Estilos generales para el cuerpo y fuentes */
